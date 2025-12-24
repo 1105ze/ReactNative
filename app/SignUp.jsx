@@ -3,14 +3,22 @@ import React from 'react'
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker'
+import { API_BASE_URL } from "../config";
 
 
 const SignUp = () => {
   const router = useRouter();
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [agreePolicy, setAgreePolicy] = useState(false);
+    const [dateOfBirth, setDateOfBirth] = useState('')
+    const [gender, setGender] = useState(null)
+    const [showGenderList, setShowGenderList] = useState(false)
     const [role, setRole] = useState(null)
     const [showRoleList, setShowRoleList] = useState(false)
     const [specialization, setSpecialization] = useState('')
+    const [password, setPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
     const [licenseImage, setLicenseImage] = useState(null)
     const pickLicenseImage = async () => {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -30,6 +38,54 @@ const SignUp = () => {
       }
     }
 
+    // send information to database
+    const handleSignup = async () => {
+      if (password !== confirmPassword) {
+        alert("Passwords do not match");
+        return;
+      }
+
+      const formattedDOB = dateOfBirth.split('/').reverse().join('-')
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/accounts/signup/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            email: email,
+            password: password,
+
+            // IMPORTANT: must match Django choices
+            role: role.toLowerCase(),      // "doctor" or "patient"
+            gender: gender.toLowerCase(),  // "male" or "female"
+
+            date_of_birth: formattedDOB,    // "YYYY-MM-DD"
+            specialization: specialization,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert("Account created successfully");
+          console.log("Saved to PostgreSQL:", data);
+
+          // optional: navigate to login screen
+          // navigation.navigate("Login");
+        } else {
+          console.log("Signup error:", data);
+          alert(JSON.stringify(data));
+        }
+      } catch (error) {
+        console.error("Network error:", error);
+        alert("Server not reachable");
+      }
+    };
+
+
 return (
     <View>
         <View>
@@ -46,12 +102,90 @@ return (
         <View style={styles.box}>
             <View style={styles.inputRow}>
                 <Image source={require('../assets/people_icon.png')} style={styles.iconImage} />
-                <TextInput placeholder="Enter Username" />
+                <TextInput
+                  placeholder="Enter Username"
+                  value={username}
+                  onChangeText={setUsername}
+                  style={{ flex: 1 }}
+                />
             </View>
 
             <View style={styles.inputRow}>
                 <Image source={require('../assets/email_icon.png')} style={styles.iconImage} />
-                <TextInput placeholder="Enter Email" />
+                <TextInput
+                  placeholder="Enter Email"
+                  value={email}
+                  onChangeText={setEmail}
+                  style={{ flex: 1 }}
+                />
+            </View>
+
+            <View style={styles.inputRow}>
+              <Image
+                source={require('../assets/clock_icon.png')}
+                style={styles.iconImage}
+              />
+              <TextInput
+                placeholder="Date of Birth (DD/MM/YYYY)"
+                value={dateOfBirth}
+                onChangeText={setDateOfBirth}
+                style={{ flex: 1 }}
+              />
+            </View>
+
+{/* Gender */}
+            <View>
+              <TouchableOpacity
+                style={styles.inputRow}
+                onPress={() => setShowGenderList(!showGenderList)}
+              >
+                <Image
+                  source={require('../assets/people_icon.png')}
+                  style={styles.iconImage}
+                />
+                <Text style={{ color: gender ? '#000' : '#999', flex: 1 }}>
+                  {gender || 'Select Gender'}
+                </Text>
+
+                <Image
+                  source={require('../assets/dropdown_arrow.png')}
+                  style={styles.arrowIcon}
+                />
+              </TouchableOpacity>
+
+              {showGenderList && (
+                <View style={styles.dropdown}>
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setGender('Male')
+                      setShowGenderList(false)
+                    }}
+                  >
+                    <Text>Male</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setGender('Female')
+                      setShowGenderList(false)
+                    }}
+                  >
+                    <Text>Female</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setGender('Other')
+                      setShowGenderList(false)
+                    }}
+                  >
+                    <Text>Other</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
 
 {/* role */}
@@ -144,12 +278,29 @@ return (
 
             <View style={styles.inputRow}>
                 <Image source={require('../assets/password_icon.png')} style={styles.iconImage} />
-                <TextInput placeholder="Enter Password" secureTextEntry />
+                <TextInput
+                  placeholder="Enter Password"
+                  secureTextEntry
+                  value={password}
+                  onChangeText={setPassword}
+                  style={{ flex: 1 }}
+                />
             </View>
 
             <View style={styles.inputRow}>
                 <Image source={require('../assets/password_icon.png')} style={styles.iconImage} />
-                <TextInput placeholder="Confirm Password" secureTextEntry />
+                <TextInput
+                  placeholder="Confirm Password"
+                  secureTextEntry
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  style={{ flex: 1 }}
+                />
+                {confirmPassword !== '' && password !== confirmPassword && (
+                  <Text style={styles.errorText}>
+                    Passwords do not match
+                  </Text>
+                )}
             </View>
 
             <View style={styles.agree}>
@@ -164,17 +315,28 @@ return (
         <TouchableOpacity
           style={[
             styles.button,
-            (!agreePolicy ||
+            (
+              !agreePolicy ||
               !role ||
-              (role === 'Doctor' && (!specialization || !licenseImage))) && {
-              opacity: 0.5,
-            },
+              !password ||
+              !confirmPassword ||
+              password !== confirmPassword ||
+              !dateOfBirth ||
+              !gender ||
+              (role === 'Doctor' && (!specialization || !licenseImage))
+            ) && { opacity: 0.5 }
           ]}
           disabled={
             !agreePolicy ||
             !role ||
+            !password ||
+            !confirmPassword ||
+            password !== confirmPassword ||
+            !dateOfBirth ||
+            !gender ||
             (role === 'Doctor' && (!specialization || !licenseImage))
           }
+          onPress={handleSignup}
         >
           <Text style={styles.buttonText}>Create Account</Text>
         </TouchableOpacity>
@@ -329,6 +491,11 @@ licensePreview: {
   height: 120,
   borderRadius: 8,
 },
-
+errorText: {
+  color: 'red',
+  fontSize: 12,
+  marginTop: 4,
+  marginLeft: 4,
+},
 
 })
