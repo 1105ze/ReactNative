@@ -106,3 +106,45 @@ class DoctorVerification(models.Model):
         self.verified_at = timezone.now()
         self.reason = reason
         self.save()
+
+class RetinalImage(models.Model):
+    UPLOADER_CHOICES = (
+        ('patient', 'Patient'),
+        ('doctor', 'Doctor'),
+    )
+
+    uploaded_by_type = models.CharField(
+        max_length=10,
+        choices=UPLOADER_CHOICES
+    )
+
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='retinal_images'
+    )
+
+    doctor = models.ForeignKey(
+        Doctor,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='retinal_images'
+    )
+
+    uploaded_at = models.DateTimeField(default=timezone.now)
+
+    retinal_image = models.BinaryField(null=True, blank=True)
+    retinal_image_size = models.IntegerField(null=True, blank=True)
+
+    def uploader_name(self):
+        if self.uploaded_by_type == 'patient' and self.patient:
+            return self.patient.user.username
+        if self.uploaded_by_type == 'doctor' and self.doctor:
+            return self.doctor.user.username
+        return "-"
+
+    def __str__(self):
+        return f"Retinal Image by {self.uploader_name()} on {self.uploaded_at.strftime('%Y-%m-%d')}"

@@ -3,6 +3,7 @@ import React from 'react'
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import { API_BASE_URL } from "../config";
 
 const upload = () => {
   const router = useRouter();
@@ -10,27 +11,112 @@ const upload = () => {
    const [image, setImage] = useState(null);
   
       // 🔹 OPEN CAMERA FUNCTION (THIS IS WHAT YOU ASKED ABOUT)
-    const openCamera = async () => {
-      // Ask camera permission
-      const permission = await ImagePicker.requestCameraPermissionsAsync()
+    // const openCamera = async () => {
+    //   // Ask camera permission
+    //   const permission = await ImagePicker.requestCameraPermissionsAsync()
   
+    //   if (!permission.granted) {
+    //     alert('Camera permission is required!')
+    //     return
+    //   }
+  
+    //   // Open camera
+    //   const result = await ImagePicker.launchCameraAsync({
+    //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    //     allowsEditing: true,
+    //     quality: 1,
+    //   })
+  
+    //   // If user took photo
+    //   if (!result.canceled) {
+    //     setImage(result.assets[0].uri)
+    //   }
+    // }
+    const openImagePicker = async () => {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
       if (!permission.granted) {
-        alert('Camera permission is required!')
-        return
+        alert('Gallery permission is required!');
+        return;
       }
-  
-      // Open camera
-      const result = await ImagePicker.launchCameraAsync({
+
+      const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 1,
-      })
-  
-      // If user took photo
+      });
+
       if (!result.canceled) {
-        setImage(result.assets[0].uri)
+        setImage(result.assets[0].uri);
       }
-    }
+    };
+    const imageToBase64 = async (uri) => {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result.split(',')[1];
+          resolve(base64data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    };
+    const uploadImageToBackend = async () => {
+      if (!image) {
+        alert("No image selected");
+        return;
+      }
+
+      try {
+        const base64Image = await imageToBase64(image);
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/accounts/retinal-images/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              image_data: base64Image,
+              uploaded_by_type: "patient",
+              uploaded_by_id: 1,
+            }),
+          }
+        );
+
+        // 🔹 ALWAYS read text first
+        const text = await response.text();
+        console.log("Status:", response.status);
+        console.log("Raw response:", text);
+
+        // ❌ request failed
+        if (!response.ok) {
+          alert("Upload failed");
+          return;
+        }
+
+        // 🔹 Try parsing JSON only if possible
+        let data = null;
+        try {
+          data = JSON.parse(text);
+          console.log("Parsed JSON:", data);
+        } catch {
+          console.log("Response is not JSON");
+        }
+
+        // ✅ success
+        alert("Image uploaded successfully");
+
+      } catch (error) {
+        console.error("Upload error:", error);
+        alert("Error uploading image");
+      }
+    };
+
 
   return (
     <View style={{flex: 1}}>
@@ -69,12 +155,12 @@ const upload = () => {
                       <Image source={{ uri: image }} style={styles.previewImage} />
   
                       {/* OVERLAY BUTTON */}
-                      <TouchableOpacity style={styles.chooseButton} onPress={openCamera}>
+                      <TouchableOpacity style={styles.chooseButton} onPress={openImagePicker}>
                       <Text style={styles.chooseText}>Choose Different Image</Text>
                       </TouchableOpacity>
                   </>
                   ) : (
-                  <TouchableOpacity style={styles.emptyUpload} onPress={openCamera} >
+                  <TouchableOpacity style={styles.emptyUpload} onPress={openImagePicker} >
                       <Text style={styles.uploadText}>Tap to upload retinal image</Text>
                       <Text style={styles.uploadSub}>Support JPG, PNG formats</Text>
                   </TouchableOpacity>
@@ -82,7 +168,7 @@ const upload = () => {
                 </View>
 
                 {image && (
-                    <TouchableOpacity style={styles.analyzeImage}>
+                    <TouchableOpacity style={styles.analyzeImage} onPress={uploadImageToBackend}>
                       <Image source={require('../assets/camera_icon.png')} style={styles.cameraIcon} />
                       <Text style={styles.analyzeText}>Analyze Image</Text>
                     </TouchableOpacity>

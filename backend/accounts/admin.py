@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils import timezone
-from .models import User, Patient, Doctor, DoctorVerification
+from .models import User, Patient, Doctor, DoctorVerification, RetinalImage
 import base64
 
 
@@ -340,3 +340,48 @@ class DoctorVerificationAdmin(admin.ModelAdmin):
 
     license_size.short_description = "License Size"
 
+@admin.register(RetinalImage)
+class RetinalImageAdmin(admin.ModelAdmin):
+    list_display = (
+        'uploader_name',
+        'uploaded_by_type',
+        'uploaded_at',
+        'image_size_display',
+    )
+
+    readonly_fields = (
+        'uploaded_at',
+        'image_preview',
+        'image_size_display',
+    )
+
+    fields = (
+        'uploaded_by_type',
+        'patient',
+        'doctor',
+        'uploaded_at',
+        'image_preview',
+        'image_size_display',
+    )
+
+    def image_preview(self, obj):
+        if not obj.retinal_image:
+            return "No image"
+        import base64
+        b64 = base64.b64encode(obj.retinal_image).decode()
+        return format_html(
+            '<img src="data:image/jpeg;base64,{}" style="max-height:300px;" />',
+            b64
+        )
+
+    def image_size_display(self, obj):
+        size = obj.retinal_image_size
+        if not size:
+            return "-"
+        if size < 1024:
+            return f"{size} B"
+        elif size < 1024 * 1024:
+            return f"{size / 1024:.2f} KB"
+        return f"{size / (1024 * 1024):.2f} MB"
+
+    image_size_display.short_description = "Image Size"
