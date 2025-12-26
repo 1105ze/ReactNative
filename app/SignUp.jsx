@@ -83,6 +83,7 @@ const SignUp = () => {
         if (response.ok) {
           alert("Account created successfully");
           console.log("Saved to PostgreSQL:", data);
+          router.push('/');
 
           // optional: navigate to login screen
           // navigation.navigate("Login");

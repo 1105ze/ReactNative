@@ -7,31 +7,7 @@ import { API_BASE_URL } from "../config";
 
 const upload = () => {
   const router = useRouter();
-
-   const [image, setImage] = useState(null);
-  
-      // 🔹 OPEN CAMERA FUNCTION (THIS IS WHAT YOU ASKED ABOUT)
-    // const openCamera = async () => {
-    //   // Ask camera permission
-    //   const permission = await ImagePicker.requestCameraPermissionsAsync()
-  
-    //   if (!permission.granted) {
-    //     alert('Camera permission is required!')
-    //     return
-    //   }
-  
-    //   // Open camera
-    //   const result = await ImagePicker.launchCameraAsync({
-    //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //     allowsEditing: true,
-    //     quality: 1,
-    //   })
-  
-    //   // If user took photo
-    //   if (!result.canceled) {
-    //     setImage(result.assets[0].uri)
-    //   }
-    // }
+    const [image, setImage] = useState(null);
     const openImagePicker = async () => {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -50,20 +26,7 @@ const upload = () => {
         setImage(result.assets[0].uri);
       }
     };
-    const imageToBase64 = async (uri) => {
-      const response = await fetch(uri);
-      const blob = await response.blob();
 
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64data = reader.result.split(',')[1];
-          resolve(base64data);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    };
     const uploadImageToBackend = async () => {
       if (!image) {
         alert("No image selected");
@@ -71,7 +34,20 @@ const upload = () => {
       }
 
       try {
-        const base64Image = await imageToBase64(image);
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          quality: 1,
+          base64: true,
+        });
+
+        if (result.canceled || !result.assets[0].base64) {
+          alert("Image selection failed");
+          return;
+        }
+
+        const base64Image = result.assets[0].base64;
+
+        console.log("Sending base64 length:", base64Image.length);
 
         const response = await fetch(
           `${API_BASE_URL}/api/accounts/retinal-images/`,
@@ -83,37 +59,28 @@ const upload = () => {
             body: JSON.stringify({
               image_data: base64Image,
               uploaded_by_type: "patient",
-              uploaded_by_id: 1,
+              uploaded_by_id: 1, // ← TODO: replace with real logged-in user ID later
             }),
           }
         );
 
-        // 🔹 ALWAYS read text first
         const text = await response.text();
         console.log("Status:", response.status);
         console.log("Raw response:", text);
 
-        // ❌ request failed
         if (!response.ok) {
-          alert("Upload failed");
+          const errorData = JSON.parse(text);
+          alert(`Upload failed: ${errorData.error || "Unknown error"}`);
           return;
         }
 
-        // 🔹 Try parsing JSON only if possible
-        let data = null;
-        try {
-          data = JSON.parse(text);
-          console.log("Parsed JSON:", data);
-        } catch {
-          console.log("Response is not JSON");
-        }
-
-        // ✅ success
+        const data = JSON.parse(text);
         alert("Image uploaded successfully");
+        console.log("Success:", data);
 
       } catch (error) {
         console.error("Upload error:", error);
-        alert("Error uploading image");
+        alert("Error uploading image: " + error.message);
       }
     };
 

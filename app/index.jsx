@@ -2,11 +2,51 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'reac
 import React from 'react'
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { API_BASE_URL } from '../config';
 
 const Home = () => {
   const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const handleSignIn = async () => {
+    if (!username || !password) {
+      alert("Please enter username and password");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/accounts/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Login successful!");
+        router.push('/homepage');
+      } else {
+        if (data.error === "NO_ACCOUNT") {
+          alert("No account found. Please create an account.");
+        } else if (data.error === "INVALID_PASSWORD") {
+          alert("Invalid username or password.");
+        } else {
+          alert("Login failed.");
+        }
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Server not reachable");
+    }
+  };
 
   return (
     <View>
@@ -37,14 +77,23 @@ const Home = () => {
       <View style={styles.box}>
         <View style={styles.inputRow}>
             <Image source={require('../assets/people_icon.png')} style={styles.iconImage} />
-            <TextInput placeholder="Username"/>
+            <TextInput
+              placeholder="Username"
+              value={username}
+              onChangeText={setUsername}
+            />
         </View>
 
 
         <View style={styles.inputRow}>
             <Image source={require('../assets/password_icon.png')} style={styles.iconImage} />
 
-            <TextInput placeholder="Password" secureTextEntry={!showPassword} />
+            <TextInput
+              placeholder="Password"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
             
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Image source={showPassword ? require('../assets/eye_open.png') : require('../assets/eye_closed.png')}style={styles.eyeIcon}/>
@@ -65,7 +114,7 @@ const Home = () => {
       </View>
 
 
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/homepage')}>
+        <TouchableOpacity style={styles.button} onPress={handleSignIn}>
           <Text style={styles.buttonText}>Sign In</Text>
         </TouchableOpacity>
       

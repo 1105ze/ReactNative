@@ -349,25 +349,43 @@ class RetinalImageAdmin(admin.ModelAdmin):
         'image_size_display',
     )
 
-    readonly_fields = (
+    list_filter = ('uploaded_by_type', 'uploaded_at')
+    search_fields = ('patient__user__username', 'doctor__user__username')
+    readonly_fields = ('uploaded_at', 'image_preview', 'image_size_display')
+
+    fields = (
+        'uploaded_by_type',
+        'uploader_display',       # ← NEW: this will show the correct one
         'uploaded_at',
         'image_preview',
         'image_size_display',
     )
 
-    fields = (
-        'uploaded_by_type',
-        'patient',
-        'doctor',
+    readonly_fields = (
         'uploaded_at',
+        'uploader_display',
         'image_preview',
         'image_size_display',
+        'uploaded_by_type',
     )
+
+    def uploader_display(self, obj):
+        """Display the correct uploader (patient or doctor) based on type"""
+        if obj.uploaded_by_type == 'patient' and obj.patient:
+            return f" {obj.patient.user.username}"
+        if obj.uploaded_by_type == 'doctor' and obj.doctor:
+            return f" {obj.doctor.user.username}"
+        return "Not assigned"
+    uploader_display.short_description = "Uploaded by"
+
+    def uploader_name(self, obj):
+        """For list view"""
+        return self.uploader_display(obj)
+    uploader_name.short_description = "Uploader"
 
     def image_preview(self, obj):
         if not obj.retinal_image:
             return "No image"
-        import base64
         b64 = base64.b64encode(obj.retinal_image).decode()
         return format_html(
             '<img src="data:image/jpeg;base64,{}" style="max-height:300px;" />',
@@ -383,5 +401,4 @@ class RetinalImageAdmin(admin.ModelAdmin):
         elif size < 1024 * 1024:
             return f"{size / 1024:.2f} KB"
         return f"{size / (1024 * 1024):.2f} MB"
-
     image_size_display.short_description = "Image Size"
