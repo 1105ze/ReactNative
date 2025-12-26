@@ -3,6 +3,8 @@ import React from 'react'
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { API_BASE_URL } from '../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const Home = () => {
   const router = useRouter();
@@ -31,8 +33,23 @@ const Home = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // 🔥 REMOVE OLD USER COMPLETELY
+        await AsyncStorage.removeItem("user");
+
+        // ✅ SAVE NEW USER
+        await AsyncStorage.setItem(
+          "user",
+          JSON.stringify({
+            id: data.user.id,
+            username: data.user.username,
+            role: data.user.role,
+          })
+        );
+
         alert("Login successful!");
-        router.push('/homepage');
+
+        // 🔥 REPLACE, NOT PUSH
+        router.replace('/homepage');
       } else {
         if (data.error === "NO_ACCOUNT") {
           alert("No account found. Please create an account.");
@@ -264,3 +281,5 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 })
+
+

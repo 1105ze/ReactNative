@@ -1,16 +1,29 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native'
 import React from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { API_BASE_URL } from "../config";
+
 
 const upload = () => {
   const router = useRouter();
     const [image, setImage] = useState(null);
+    const [user, setUser] = useState(null);
+    useEffect(() => { 
+      const loadUser = async () => { 
+        const storedUser = await AsyncStorage.getItem("user"); 
+        console.log("STORED USER:", storedUser); 
+        if (storedUser) { setUser(JSON.parse(storedUser)); 
+
+        } 
+      }; 
+      loadUser(); 
+    }, []);
+    const [imageBase64, setImageBase64] = useState(null);
     const openImagePicker = async () => {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
       if (!permission.granted) {
         alert('Gallery permission is required!');
         return;
@@ -20,69 +33,57 @@ const upload = () => {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 1,
+        base64: true, // 🔹 get base64 here
       });
 
       if (!result.canceled) {
         setImage(result.assets[0].uri);
+        setImageBase64(result.assets[0].base64);
       }
     };
 
     const uploadImageToBackend = async () => {
-      if (!image) {
+      if (!imageBase64) {
         alert("No image selected");
         return;
       }
 
+      if (!user) {
+        alert("User not logged in");
+        return;
+      }
+
+
       try {
-        const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 1,
-          base64: true,
-        });
-
-        if (result.canceled || !result.assets[0].base64) {
-          alert("Image selection failed");
-          return;
-        }
-
-        const base64Image = result.assets[0].base64;
-
-        console.log("Sending base64 length:", base64Image.length);
-
         const response = await fetch(
           `${API_BASE_URL}/api/accounts/retinal-images/`,
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              image_data: base64Image,
-              uploaded_by_type: "patient",
-              uploaded_by_id: 1, // ← TODO: replace with real logged-in user ID later
+              image_data: imageBase64,
+              uploaded_by_type: user.role,   // "doctor" or "patient"
+              uploaded_by_id: user.id,
             }),
           }
         );
 
-        const text = await response.text();
-        console.log("Status:", response.status);
-        console.log("Raw response:", text);
+        const data = await response.json();
 
         if (!response.ok) {
-          const errorData = JSON.parse(text);
-          alert(`Upload failed: ${errorData.error || "Unknown error"}`);
+          alert(data.error || "Upload failed");
           return;
         }
 
-        const data = JSON.parse(text);
         alert("Image uploaded successfully");
-        console.log("Success:", data);
+        setImage(null);
+        setImageBase64(null);
 
       } catch (error) {
-        console.error("Upload error:", error);
-        alert("Error uploading image: " + error.message);
+        alert("Error uploading image");
       }
     };
+
 
 
   return (
@@ -97,7 +98,9 @@ const upload = () => {
 
                 <Text style={styles.subtitle}>Diabetic Retinopathy Screening</Text>
             </View>
-            <Text style={styles.username}>Ze Gui</Text>
+            <Text style={styles.username}>
+              Hey, {user ? user.username : ""}
+            </Text>
         </View>
 
         <View>

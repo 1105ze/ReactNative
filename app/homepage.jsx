@@ -1,9 +1,22 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView} from 'react-native'
 import React from 'react'
 import { useRouter } from 'expo-router';
+import { useEffect, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const homepage = () => {
     const router = useRouter();
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const loadUser = async () => {
+        const storedUser = await AsyncStorage.getItem("user");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+        };
+        loadUser();
+    }, []);
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <View>
@@ -17,7 +30,7 @@ const homepage = () => {
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styles.name}>Hey, Ze Gui</Text>
+                <Text style={styles.name}>Hey, {user ? user.username : ""}</Text>
 
                 <View>
                     <TouchableOpacity style={styles.imageFrame} onPress={() => router.push('/')}>

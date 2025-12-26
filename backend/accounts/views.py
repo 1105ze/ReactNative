@@ -4,7 +4,7 @@ from rest_framework import status
 from .serializers import SignupSerializer
 from django.contrib.auth import authenticate
 import base64
-from .models import Patient, RetinalImage, User
+from .models import Patient, RetinalImage, User, Doctor
 
 
 @api_view(['POST'])
@@ -34,33 +34,51 @@ def upload_retinal_image(request):
     if not image_data:
         return Response({"error": "image_data is required"}, status=400)
 
-    if uploaded_by_type != "patient":
-        return Response({"error": "Only patients can upload retinal images"}, status=400)
-
-    try:
-        patient = Patient.objects.get(id=uploaded_by_id)
-    except Patient.DoesNotExist:
-        return Response({"error": "Patient not found"}, status=404)
-
     try:
         image_bytes = base64.b64decode(image_data)
+    except Exception:
+        return Response({"error": "Invalid base64 image data"}, status=400)
+
+    # ✅ PATIENT upload
+    if uploaded_by_type == "patient":
+        try:
+            patient = Patient.objects.get(user_id=uploaded_by_id)
+        except Patient.DoesNotExist:
+            return Response({"error": "Patient not found"}, status=404)
+
         retinal_image = RetinalImage.objects.create(
-            uploaded_by_type=uploaded_by_type,
+            uploaded_by_type="patient",
             patient=patient,
-            retinal_image=image_bytes,           # ← raw bytes
-            retinal_image_size=len(image_bytes)  # ← optional but useful
+            retinal_image=image_bytes,
+            retinal_image_size=len(image_bytes),
         )
 
-        return Response({
-            "message": "Retinal image uploaded successfully",
-            "retinal_image_id": retinal_image.id
-        }, status=201)
+    # ✅ DOCTOR upload
+    elif uploaded_by_type == "doctor":
+        try:
+            doctor = Doctor.objects.get(user_id=uploaded_by_id)
+        except Doctor.DoesNotExist:
+            return Response({"error": "Doctor not found"}, status=404)
 
-    except base64.binascii.Error:
-        return Response({"error": "Invalid base64 image data"}, status=400)
-    except Exception as e:
-        print("❌ Upload error:", str(e))
-        return Response({"error": str(e)}, status=500)
+        retinal_image = RetinalImage.objects.create(
+            uploaded_by_type="doctor",
+            doctor=doctor,
+            retinal_image=image_bytes,
+            retinal_image_size=len(image_bytes),
+        )
+
+    else:
+        return Response({"error": "Invalid uploaded_by_type"}, status=400)
+
+    return Response(
+        {
+            "message": "Retinal image uploaded successfully",
+            "retinal_image_id": retinal_image.id,
+        },
+        status=201
+    )
+
+
     
 @api_view(['POST'])
 def login(request):
