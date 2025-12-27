@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#88C8FF",
     paddingVertical: 15,
     borderRadius: 100,
-    marginTop: 80,
+    marginTop: 40,
     marginLeft: 50,
     marginRight: 720,
     alignItems: "center",
@@ -402,8 +402,8 @@ const styles = StyleSheet.create({
   },
   box: {
     padding: 20,
-    marginLeft: 80,
-    marginRight: 80,
+    marginLeft: 40,
+    marginRight: 40,
     marginTop: 40, 
   },
   inputRow: {
@@ -437,12 +437,12 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#88C8FF",
-    paddingVertical: 18,
+    paddingVertical: 15,
     borderRadius: 10,
-    marginTop: 150,
+    marginTop: 40,
     alignItems: "center",
-    marginLeft: 100,
-    marginRight: 100,
+    marginLeft: 60,
+    marginRight: 60,
   },
   buttonText: {
     color: "black",
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   signupRow: {
     flexDirection: "row",
-    marginTop: 30,
+    marginTop: 20,
     justifyContent: 'center',
   },
   signupLink: {

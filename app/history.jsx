@@ -65,7 +65,7 @@ const history = () => {
                 </TouchableOpacity>
             </View>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 140 }}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
                     {historyData.map(item => (
                     <TouchableOpacity
                         key={item.id}
@@ -105,7 +105,7 @@ export default history
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    marginTop: 50,
+    marginTop: 10,
     backgroundColor: "#88C8FF",
     paddingVertical: 15,
   },
@@ -113,8 +113,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#aad5fcff",
     paddingVertical: 15,
     borderRadius: 100,
-    marginLeft: 50,
-    alignItems: "center"
+    marginLeft: 30,
+    alignItems: "center",
+    borderWidth: 3,
+    borderColor: '#54adfaff',
     },
   profileImage: {
     width: 43,
@@ -149,8 +151,8 @@ const styles = StyleSheet.create({
   back: {
     paddingVertical: 15,
     borderRadius: 100,
-    marginTop: 20,
-    marginLeft: 50,
+    marginTop: 10,
+    marginLeft: 30,
     marginRight: 100,
   },
   card: {
@@ -196,23 +198,24 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: '10%',
-    marginLeft: '6%',
-    marginRight: '6%',
+    marginTop: 20,
+    marginLeft: 30,
+    marginRight: 30,
     flexDirection: 'row'
   },
   uploadIcon: {
     width: 30,
     height: 30,
     resizeMode: 'contain',
-    marginLeft: '40%'
+    marginLeft: 130
   },
   analysisText: {
     fontWeight: 'bold',
   },
   disclaimer: {
-    fontSize: 12,
+    fontSize: 11,
     textAlign: 'center',
-    marginTop: '15%'
+    marginTop: 90,
+    marginBottom: 10,
   }
 })

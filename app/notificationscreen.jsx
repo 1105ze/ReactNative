@@ -74,7 +74,7 @@ export default notificationscreen
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    marginTop: 50,
+    marginTop: 10,
     backgroundColor: "#88C8FF",
     paddingVertical: 15,
   },
@@ -82,8 +82,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#aad5fcff",
     paddingVertical: 15,
     borderRadius: 100,
-    marginLeft: 50,
-    alignItems: "center"
+    marginLeft: 30,
+    alignItems: "center",
+    borderWidth: 3,
+    borderColor: '#54adfaff',
     },
   profileImage: {
     width: 43,
@@ -118,8 +120,8 @@ const styles = StyleSheet.create({
   back: {
     paddingVertical: 15,
     borderRadius: 100,
-    marginTop: 20,
-    marginLeft: 50,
+    marginTop: 10,
+    marginLeft: 30,
     marginRight: 100,
   },
   noteImage: {
@@ -144,7 +146,7 @@ const styles = StyleSheet.create({
     color: '#444',
     lineHeight: 25,
     marginLeft: 10,
-    marginRight: "10%",
+    marginRight: 70,
     marginTop: 5,
   },
   button: {
@@ -174,13 +176,13 @@ const styles = StyleSheet.create({
   markRead: {
     borderWidth: 2,
     borderColor: '#4da3ff',
-    borderRadius: 20,
+    borderRadius: 50,
     paddingVertical: 10,
     alignItems: 'center',
     marginVertical: 12,
-    marginLeft: 300,
-    marginRight: 300,
-    marginTop: 450,
+    marginLeft: 120,
+    marginRight: 120,
+    marginTop: 180,
     flexDirection: 'row'
   },
   markReadText: {
@@ -192,6 +194,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 25,
     resizeMode: 'contain',
-    marginLeft: 30,
+    marginLeft: 20,
+    tintColor: '#4da3ff',
   },
 })

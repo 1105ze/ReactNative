@@ -163,7 +163,7 @@ export default upload
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    marginTop: 50,
+    marginTop: 10,
     backgroundColor: "#88C8FF",
     paddingVertical: 15,
   },
@@ -171,8 +171,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#aad5fcff",
     paddingVertical: 15,
     borderRadius: 100,
-    marginLeft: 50,
-    alignItems: "center"
+    marginLeft: 30,
+    alignItems: "center",
+    borderWidth: 3,
+    borderColor: '#54adfaff',
     },
   profileImage: {
     width: 43,
@@ -207,8 +209,8 @@ const styles = StyleSheet.create({
   back: {
     paddingVertical: 15,
     borderRadius: 100,
-    marginTop: 20,
-    marginLeft: 50,
+    marginTop: 10,
+    marginLeft: 30,
     marginRight: 100,
   },
   infoBox: {
@@ -216,7 +218,7 @@ const styles = StyleSheet.create({
     borderColor: '#4da3ff',
     borderRadius: 12,
     padding: 14,
-    marginTop: 20,
+    marginTop: 10,
     marginLeft: '6%',
     marginRight: '6%',
     backgroundColor: '#c1ddfeff'
@@ -245,7 +247,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: '#4da3ff',
     borderRadius: 12,
-    height: 380,
+    height: 300,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: '5%',
@@ -301,7 +303,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 25,
     resizeMode: 'contain',
-    marginLeft: '37%'
+    marginLeft: 105
   },
   analyzeText: {
     fontWeight: 'bold',
@@ -321,15 +323,15 @@ const styles = StyleSheet.create({
     width: 20,
     height: 25,
     resizeMode: 'contain',
-    marginLeft: '35%'
+    marginLeft: 105,
   },
   historyText: {
     fontWeight: '600',
     marginLeft: '2%'
   },
   disclaimer: {
-    fontSize: 12,
+    fontSize: 11,
     textAlign: 'center',
-    marginTop: '20%'
+    marginTop: 90,
   }
 })
