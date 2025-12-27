@@ -72,16 +72,11 @@ const Home = () => {
         <TouchableOpacity style={styles.back} onPress={() => router.push('/firstpage')}>
           <Image source={require('../assets/back_icon.png')} style={styles.backImage} />
         </TouchableOpacity>
-
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>DR Detection</Text>
-          <Text style={styles.headerSubtitle}>Diabetic Retinopathy Screening</Text>
-        </View>
       </View>
 
       {/* Profile Icon */}
       <View style={styles.avatarWrapper}>
-        <View style={styles.avatar} />
+        <Image source={require('../assets/logo.png')} style={styles.logoImage} />
       </View>
 
       {/* Welcome Text */}
@@ -167,30 +162,12 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginLeft: "5",
   },
-  header: {
-    alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 10,
-    justifyContent: 'space-between',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    alignItems: "center",
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: "#555",
-  },
   avatarWrapper: {
-    marginTop: 30,
     alignItems: "center",
   },
-  avatar: {
-    width: 110,
-    height: 110,
-    backgroundColor: "#88C8FF",
-    borderRadius: 60,
+  logoImage: {
+    width: 200,
+    height: 200,
   },
   welcometext:{
     alignItems: "center",

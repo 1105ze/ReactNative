@@ -6,7 +6,9 @@ const firstpage = () => {
   const router = useRouter();
 
   return (
-    <View>
+    <View style={styles.header}>
+        <Image source={require('../assets/logo.png')} style={styles.logoImage} />
+
         <TouchableOpacity style={styles.button} onPress={() => router.replace('/')}>
             <Text style={styles.buttonText}>Sign In</Text>
         </TouchableOpacity>
@@ -23,11 +25,20 @@ const firstpage = () => {
 export default firstpage
 
 const styles = StyleSheet.create({
-    button: {
+  header: {
+    backgroundColor: '#88C8FF',
+  },
+  logoImage: {
+    width: 300,
+    height: 300,
+    marginTop: 200,
+    marginLeft: 70,
+  },
+  button: {
     backgroundColor: "#88C8FF",
     paddingVertical: 15,
     borderRadius: 10,
-    marginTop: 600,
+    marginTop: 180,
     alignItems: "center",
     marginLeft: 100,
     marginRight: 100,
