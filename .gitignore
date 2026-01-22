@@ -1,0 +1,15 @@
+# Python / Django junk
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+*.sqlite3
+
+# macOS
+.DS_Store
+
+# Expo / React Native
+.expo/
+node_modules/
+*.log
