@@ -5,6 +5,9 @@ from .serializers import SignupSerializer
 from django.contrib.auth import authenticate
 import base64
 from .models import Patient, RetinalImage, User, Doctor
+# from rest_framework_simplejwt.tokens import RefreshToken
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.decorators import permission_classes
 
 
 @api_view(['POST'])
@@ -120,3 +123,54 @@ def login(request):
         },
         status=status.HTTP_200_OK
     )
+
+# @api_view(['POST'])
+# def login(request):
+#     username = request.data.get("username")
+#     password = request.data.get("password")
+
+#     if not username or not password:
+#         return Response({"error": "Username and password required"}, status=400)
+
+#     try:
+#         user = User.objects.get(username=username)
+#     except User.DoesNotExist:
+#         return Response({"error": "NO_ACCOUNT"}, status=404)
+
+#     user = authenticate(username=username, password=password)
+#     if not user:
+#         return Response({"error": "INVALID_PASSWORD"}, status=401)
+
+#     refresh = RefreshToken.for_user(user)
+
+#     return Response({
+#         "access": str(refresh.access_token),
+#         "refresh": str(refresh),
+#         "user": {
+#             "id": user.id,
+#             "username": user.username,
+#             "role": user.role,
+#         }
+#     })
+
+
+# @api_view(['GET', 'PUT'])
+# @permission_classes([IsAuthenticated])
+# def profile(request):
+#     user = request.user  # 🔥 auto from token
+
+#     if request.method == "GET":
+#         return Response({
+#             "username": user.username,
+#             "email": user.email,
+#             "role": user.role,
+#             "gender": user.gender,
+#             "date_of_birth": user.date_of_birth,
+#         })
+
+#     if request.method == "PUT":
+#         user.gender = request.data.get("gender", user.gender)
+#         user.date_of_birth = request.data.get("date_of_birth", user.date_of_birth)
+#         user.save()
+
+#         return Response({"message": "Profile updated"})
