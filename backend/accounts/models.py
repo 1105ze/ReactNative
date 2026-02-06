@@ -138,6 +138,7 @@ class RetinalImage(models.Model):
 
     retinal_image = models.BinaryField(null=True, blank=True)
     retinal_image_size = models.IntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def uploader_name(self):
         if self.uploaded_by_type == 'patient' and self.patient:

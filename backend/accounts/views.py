@@ -132,3 +132,32 @@ def profile(request):
         user.save()
 
         return Response({"message": "Profile updated"})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def recent_retinal_images(request):
+    user = request.user
+
+    if user.role == "patient":
+        images = RetinalImage.objects.filter(
+            patient__user=user
+        ).order_by("-created_at")[:5]
+
+    elif user.role == "doctor":
+        images = RetinalImage.objects.filter(
+            doctor__user=user
+        ).order_by("-created_at")[:5]
+
+    else:
+        return Response([])
+
+    data = []
+    for img in images:
+        data.append({
+            "id": img.id,
+            "image_base64": base64.b64encode(img.retinal_image).decode("utf-8"),
+            "created_at": img.created_at,
+        })
+
+    return Response(data)
