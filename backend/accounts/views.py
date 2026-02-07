@@ -4,10 +4,11 @@ from rest_framework import status
 from .serializers import SignupSerializer
 from django.contrib.auth import authenticate
 import base64
-from .models import Patient, RetinalImage, User, Doctor
+from .models import Patient, RetinalImage, User, Doctor, PredictionResult
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+from django.utils import timezone
 
 
 @api_view(['POST'])
@@ -72,6 +73,12 @@ def upload_retinal_image(request):
 
     else:
         return Response({"error": "Invalid uploaded_by_type"}, status=400)
+    
+        # ===== CREATE EMPTY PREDICTION RESULT =====
+    PredictionResult.objects.create(
+        retinal_image=retinal_image,
+        prediction_date=timezone.now()
+    )
 
     return Response(
         {

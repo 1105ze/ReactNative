@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-
+import base64
+from django.utils.html import format_html
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -149,3 +150,131 @@ class RetinalImage(models.Model):
 
     def __str__(self):
         return f"Retinal Image by {self.uploader_name()} on {self.uploaded_at.strftime('%Y-%m-%d')}"
+
+
+class PredictionResult(models.Model):
+    retinal_image = models.ForeignKey(
+        RetinalImage,
+        on_delete=models.CASCADE,
+        related_name='predictions'
+    )
+
+    predicted_dr_stage = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True
+    )
+
+    confidence_score = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    ai_report = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    gradcam_data = models.BinaryField(
+        null=True,
+        blank=True
+    )
+
+    prediction_date = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Prediction #{self.id}"
+    
+    def retinal_image_preview(self, obj):
+        if not obj.retinal_image or not obj.retinal_image.retinal_image:
+            return "No image"
+
+        b64 = base64.b64encode(obj.retinal_image.retinal_image).decode()
+        return format_html(
+            '<img src="data:image/jpeg;base64,{}" style="max-height:300px; border-radius:6px;" />',
+            b64
+        )
+
+    retinal_image_preview.short_description = "Retinal Image Preview"
+    
+
+class DoctorValidation(models.Model):
+    prediction = models.ForeignKey(
+        PredictionResult,
+        on_delete=models.CASCADE,
+        related_name='validations'
+    )
+
+    doctor = models.ForeignKey(
+        Doctor,
+        on_delete=models.CASCADE,
+        related_name='validations'
+    )
+
+    final_dr_stage = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True
+    )
+
+    doctor_comments = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    validation_date = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Validation #{self.id}"
+
+    
+
+class Notification(models.Model):
+    doctor = models.ForeignKey(
+        Doctor,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notifications'
+    )
+
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notifications'
+    )
+
+    prediction = models.ForeignKey(
+        PredictionResult,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='notifications'
+    )
+
+    message = models.TextField()
+
+    is_read = models.BooleanField(default=False)
+
+    receiver_role = models.CharField(
+        max_length=10,
+        choices=(('doctor', 'Doctor'), ('patient', 'Patient'))
+    )
+
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification #{self.id}"
+
