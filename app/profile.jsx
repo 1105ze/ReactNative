@@ -9,22 +9,43 @@ const profile = () => {
     const [notifEnabled, setNotifEnabled] = React.useState(true);
     const [user, setUser] = useState(null);
 
-    useEffect(() => {
-      const loadUser = async () => {
-        const storedUser = await AsyncStorage.getItem("user");
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      };
-      loadUser();
-    }, []);
+    // useEffect(() => {
+    //   const loadUser = async () => {
+    //     const storedUser = await AsyncStorage.getItem("user");
+    //     if (storedUser) {
+    //       setUser(JSON.parse(storedUser));
+    //     }
+    //   };
+    //   loadUser();
+    // }, []);
+
+        useEffect(() => {
+        const loadUser = async () => {
+            const storedUser = await AsyncStorage.getItem("user");
+
+            if (!storedUser) {
+            router.replace("/firstpage");
+            return;
+            }
+
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+        };
+
+        loadUser();
+        }, []);
 
     return (
         <ScrollView>
             <View>
                 <View style={styles.header}>
                     <View>
-                        <TouchableOpacity style={styles.back} onPress={() => router.push('/home')}>
+                        <TouchableOpacity
+                            style={styles.back}
+                            onPress={() =>
+                                router.push(user?.role === "doctor" ? "/doctorhome" : "/home")
+                            }
+                            >
                             <Text style={styles.backText}>‹   Profile</Text>
                         </TouchableOpacity>
                     </View>
@@ -43,7 +64,16 @@ const profile = () => {
                 </View>
 
                 <View style={styles.button}>
-                    <TouchableOpacity style={styles.row} onPress={() => router.push("/personaldetail")}>
+                    <TouchableOpacity
+                        style={styles.row}
+                        onPress={() =>
+                            router.push(
+                            user?.role === "doctor"
+                                ? "/doctorpersonaldetail"
+                                : "/personaldetail"
+                            )
+                        }
+                        >
                         <Image source={require('../assets/people_icon.png')} style={styles.rowImage} />
                         <Text style={styles.rowText}>Personal Details</Text>
                         <View style={styles.rowRight}>

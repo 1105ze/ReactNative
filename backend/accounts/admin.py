@@ -99,6 +99,7 @@ class DoctorAdmin(admin.ModelAdmin):
         "gender",
         "date_of_birth",
         "role",
+        "specialization",
         "license_preview",
         "license_size",  # ✅ HERE
         "verification_status",

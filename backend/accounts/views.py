@@ -4,7 +4,7 @@ from rest_framework import status
 from .serializers import SignupSerializer
 from django.contrib.auth import authenticate
 import base64
-from .models import Patient, RetinalImage, User, Doctor, PredictionResult
+from .models import Patient, RetinalImage, User, Doctor, PredictionResult, DoctorVerification
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
@@ -96,7 +96,10 @@ def login(request):
     password = request.data.get("password")
 
     if not username or not password:
-        return Response({"error": "Username and password required"}, status=400)
+        return Response(
+            {"error": "Username and password required"},
+            status=400
+        )
 
     try:
         user = User.objects.get(username=username)
@@ -106,6 +109,28 @@ def login(request):
     user = authenticate(username=username, password=password)
     if not user:
         return Response({"error": "INVALID_PASSWORD"}, status=401)
+
+    # 🔒 BLOCK doctors who are not verified
+    if user.role == "doctor":
+        try:
+            doctor = Doctor.objects.get(user=user)
+            verification = DoctorVerification.objects.filter(
+                doctor=doctor
+            ).first()
+
+            if not verification or verification.status != "verified":
+                return Response(
+                    {
+                        "error": "DOCTOR_NOT_VERIFIED",
+                        "status": verification.status if verification else "pending"
+                    },
+                    status=403
+                )
+        except Doctor.DoesNotExist:
+            return Response(
+                {"error": "DOCTOR_PROFILE_MISSING"},
+                status=403
+            )
 
     refresh = RefreshToken.for_user(user)
 
@@ -120,24 +145,77 @@ def login(request):
     })
 
 
+
+# @api_view(["GET", "PUT"])
+# @permission_classes([IsAuthenticated])
+# def profile(request):
+#     user = request.user
+
+#     if request.method == "GET":
+#         return Response({
+#             "username": user.username,
+#             "email": user.email,
+#             "gender": user.gender,
+#             "date_of_birth": user.date_of_birth,
+#         })
+
+#     if request.method == "PUT":
+#         user.gender = request.data.get("gender", user.gender)
+#         user.date_of_birth = request.data.get("date_of_birth", user.date_of_birth)
+#         user.email = request.data.get("email", user.email)
+#         user.save()
+
+#         return Response({"message": "Profile updated"})
+
 @api_view(["GET", "PUT"])
 @permission_classes([IsAuthenticated])
 def profile(request):
     user = request.user
 
     if request.method == "GET":
-        return Response({
+        data = {
             "username": user.username,
             "email": user.email,
             "gender": user.gender,
             "date_of_birth": user.date_of_birth,
-        })
+        }
+
+        if user.role == "doctor":
+            doctor = Doctor.objects.get(user=user)
+
+            data["specialist"] = doctor.specialization
+
+            verification = DoctorVerification.objects.filter(
+                doctor=doctor
+            ).first()
+            data["verification_status"] = (
+                verification.status if verification else "pending"
+            )
+
+            if verification and verification.license_image:
+                data["license_base64"] = (
+                    "data:image/jpeg;base64,"
+                    + base64.b64encode(verification.license_image).decode()
+                )
+            else:
+                data["license_base64"] = None
+
+        return Response(data)
 
     if request.method == "PUT":
         user.gender = request.data.get("gender", user.gender)
-        user.date_of_birth = request.data.get("date_of_birth", user.date_of_birth)
+        user.date_of_birth = request.data.get(
+            "date_of_birth", user.date_of_birth
+        )
         user.email = request.data.get("email", user.email)
         user.save()
+
+        if user.role == "doctor":
+            doctor = Doctor.objects.get(user=user)
+            doctor.specialization = request.data.get(
+                "specialist", doctor.specialization
+            )
+            doctor.save()
 
         return Response({"message": "Profile updated"})
 

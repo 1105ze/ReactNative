@@ -6,6 +6,16 @@ import { API_BASE_URL } from "../config";
 
 const home = () => {
     const router = useRouter();
+    useEffect(() => {
+    const guard = async () => {
+        const user = JSON.parse(await AsyncStorage.getItem("user"));
+        if (!user || user.role !== "patient") {
+        router.replace("/doctorhome");
+        }
+    };
+    guard();
+    }, []);
+    
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -17,6 +27,7 @@ const home = () => {
         };
         loadUser();
     }, []);
+
 
     const ads = [
         {id: "1", image: require('../assets/eye_open.png')},
@@ -101,7 +112,7 @@ const home = () => {
                             <Text style={styles.navigationText}>View History</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.navigationButton} onPress={() => router.push('/upload')} >
+                        <TouchableOpacity style={styles.navigationButton} onPress={() => router.push('/specialist')} >
                             <Image source={require('../assets/specialist_icon.png')} style={styles.navigationImage} />
                             <Text style={styles.navigationText}>Specialist</Text>
                         </TouchableOpacity>

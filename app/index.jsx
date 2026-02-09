@@ -51,16 +51,28 @@ const Home = () => {
         );
 
         alert("Login successful!");
-        router.replace("/home");
+        router.replace("/role-gate");
       } else {
         if (data.error === "NO_ACCOUNT") {
           alert("No account found. Please create an account.");
-        } else if (data.error === "INVALID_PASSWORD") {
+        } 
+        else if (data.error === "INVALID_PASSWORD") {
           alert("Invalid username or password.");
-        } else {
+        } 
+        else if (data.error === "DOCTOR_NOT_VERIFIED") {
+          if (data.status === "pending") {
+            alert("Your doctor account is pending admin verification.");
+          } else if (data.status === "rejected") {
+            alert("Your doctor account was rejected by admin.");
+          } else {
+            alert("Your doctor account is not verified.");
+          }
+        } 
+        else {
           alert("Login failed.");
         }
       }
+
     } catch (error) {
       console.error("Login error:", error);
       alert("Server not reachable");

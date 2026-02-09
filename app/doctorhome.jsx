@@ -1,9 +1,31 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, FlatList } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react'
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from "../config";
 
 const doctorhome = () => {
     const router = useRouter();
+    useEffect(() => {
+        const guard = async () => {
+            const user = JSON.parse(await AsyncStorage.getItem("user"));
+            if (!user || user.role !== "doctor") {
+            router.replace("/home");
+            }
+        };
+        guard();
+        }, []);
+
+    const [user, setUser] = useState(null);
+        useEffect(() => {
+        const loadUser = async () => {
+            const storedUser = await AsyncStorage.getItem("user");
+            if (storedUser) {
+            setUser(JSON.parse(storedUser));
+            }
+        };
+        loadUser();
+        }, []);
 
     const ads = [
         {id: "1", image: require('../assets/eye_open.png')},
@@ -38,18 +60,42 @@ const doctorhome = () => {
         },
     ];
 
-    const recentUploads = [
+    // const recentUploads = [
+    //     {
+    //         id: "r1",
+    //         image: require("../assets/eye_open.png"),
+    //         time: "Uploaded by 3/12/2025 8:00:00 P.M.",
+    //     },
+    //     {
+    //         id: "r2",
+    //         image: require("../assets/eye_open.png"),
+    //         time: "Uploaded by 2/12/2025 9:10:00 A.M.",
+    //     },
+    // ];
+    const [recentUploads, setRecentUploads] = useState([]);
+
+    useEffect(() => {
+    const loadRecentUploads = async () => {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) return;
+
+        const res = await fetch(
+        `${API_BASE_URL}/api/accounts/retina/recent/`,
         {
-            id: "r1",
-            image: require("../assets/eye_open.png"),
-            time: "Uploaded by 3/12/2025 8:00:00 P.M.",
-        },
-        {
-            id: "r2",
-            image: require("../assets/eye_open.png"),
-            time: "Uploaded by 2/12/2025 9:10:00 A.M.",
-        },
-    ];
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        }
+        );
+
+        if (res.ok) {
+        const data = await res.json();
+        setRecentUploads(data);
+        }
+    };
+
+    loadRecentUploads();
+    }, []);
 
     const adListRef = useRef(null);
     const [activeAdIndex, setActiveAdIndex] = useState(0);
@@ -67,7 +113,7 @@ const doctorhome = () => {
                 <View>
                     <View style={styles.topSection}>
                         <View style={styles.header}>
-                            <TouchableOpacity style={styles.profile} onPress={() => router.push('/doctorpersonaldetail')}>
+                            <TouchableOpacity style={styles.profile} onPress={() => router.push('/profile')}>
                                 <Image source={require('../assets/people_icon.png')} style={styles.profileImage} />
                             </TouchableOpacity>
 
@@ -75,7 +121,9 @@ const doctorhome = () => {
                                 <Image source={require('../assets/notification_icon.png')} style={styles.notificationIcon} />
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.name}>Hey, Ze Gui</Text>
+                        <Text style={styles.name}>
+                            Hey, {user ? user.username : ""}
+                        </Text>
                     </View>
 
                     <View style={styles.navigationBar}>
@@ -187,23 +235,24 @@ const doctorhome = () => {
 
                     <FlatList
                         data={recentUploads}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item) => item.id.toString()}
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{
-                            paddingLeft: 20,
-                            paddingRight: 10,
-                            paddingBottom: 10,
-                        }}
                         renderItem={({ item }) => (
-                        <TouchableOpacity activeOpacity={0.9} style={styles.recentCard} onPress={() => router.push("/doctorresult")}>
-                            <Image source={item.image} style={styles.recentImage} />
+                            <TouchableOpacity style={styles.recentCard}>
+                            <Image
+                                source={{ uri: `data:image/jpeg;base64,${item.image_base64}` }}
+                                style={styles.recentImage}
+                            />
                             <View style={styles.recentOverlay}>
-                            <Text style={styles.recentOverlayText}>{item.time}</Text>
+                                <Text style={styles.recentOverlayText}>
+                                Uploaded on {new Date(item.created_at).toLocaleString()}
+                                </Text>
                             </View>
-                        </TouchableOpacity>
+                            </TouchableOpacity>
                         )}
-                    />
+                        />
+
 
                     <TouchableOpacity style={styles.signoutButton} onPress={() => router.push("/firstpage")}>
                         <Image source={require('../assets/signout_icon.png')} style={styles.signoutImage} />

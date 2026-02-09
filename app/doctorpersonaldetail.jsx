@@ -1,57 +1,162 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TextInput, Pressable} from 'react-native'
 import React from 'react'
 import { useRouter } from 'expo-router';
+import { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_BASE_URL } from "../config";
 
 const doctorpersonaldetail = () => {
     const router = useRouter();
     const [isEditing, setIsEditing] = React.useState(false);
 
-    const [username, setUsername] = React.useState("Ze Gui");
-    const [gender, setGender] = React.useState("male");
-    const [day, setDay] = React.useState("01");
-    const [month, setMonth] = React.useState("01");
-    const [year, setYear] = React.useState("2025");
-    const [occupation, setOccupation] = React.useState("Doctor");
-    const [email, setEmail] = React.useState("123@gmail.com");
-    const [contact, setContact] = React.useState("+60 12-3456789");
-    const [password, setPassword] = React.useState("Zegui123.");
-    const [specialist, setSpecialist] = React.useState("Eye specialist");
+    // const [username, setUsername] = React.useState("Ze Gui");
+    // const [gender, setGender] = React.useState("male");
+    // const [day, setDay] = React.useState("01");
+    // const [month, setMonth] = React.useState("01");
+    // const [year, setYear] = React.useState("2025");
+    // const [occupation, setOccupation] = React.useState("Doctor");
+    // const [email, setEmail] = React.useState("123@gmail.com");
+    // const [contact, setContact] = React.useState("+60 12-3456789");
+    // const [password, setPassword] = React.useState("Zegui123.");
+    // const [specialist, setSpecialist] = React.useState("Eye specialist");
+    const [username, setUsername] = React.useState("");
+    const [gender, setGender] = React.useState("");
+    const [day, setDay] = React.useState("");
+    const [month, setMonth] = React.useState("");
+    const [year, setYear] = React.useState("");
+    const [email, setEmail] = React.useState("");
+    const [specialist, setSpecialist] = React.useState("");
+    const [status, setStatus] = React.useState("");
+    const [licenseUrl, setLicenseUrl] = React.useState(null);
 
+    useEffect(() => {
+        let isMounted = true;
 
-    const occupations = ["Patient", "Doctor"];
-    const [showOccModal, setShowOccModal] = React.useState(false);
+        const loadDoctorProfile = async () => {
+            const token = await AsyncStorage.getItem("accessToken");
+            const userStr = await AsyncStorage.getItem("user");
+
+            if (!token || !userStr) {
+            router.replace("/firstpage");
+            return;
+            }
+
+            const user = JSON.parse(userStr);
+            if (user.role !== "doctor") {
+            router.replace("/home");
+            return;
+            }
+
+            try {
+            const res = await fetch(`${API_BASE_URL}/api/accounts/profile/`, {
+                headers: {
+                Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                console.log("Doctor profile fetch failed");
+                return;
+            }
+
+            const data = await res.json();
+            if (!isMounted) return;
+
+            setUsername(data.username || "");
+            setGender(data.gender || "");
+            setEmail(data.email || "");
+            setSpecialist(data.specialist || "");
+            setStatus(data.verification_status || "");
+            setLicenseUrl(data.license_base64 || null);
+
+            if (data.date_of_birth) {
+                const [y, m, d] = data.date_of_birth.split("-");
+                setYear(y);
+                setMonth(m);
+                setDay(d);
+            }
+            } catch (e) {
+            console.log("Doctor profile error:", e.message);
+            }
+        };
+
+        loadDoctorProfile();
+
+        return () => {
+            isMounted = false;
+        };
+        }, []);
+
 
     const toggleEdit = () => setIsEditing((v) => !v);
 
-    const saveProfile = () => {
-        setIsEditing(false);
-    };
 
-    const Radio = ({ label, selected, onPress }) => {
-    return (
-        <Pressable onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View style={{
-            width: 20,
-            height: 20,
-            borderRadius: 10,
-            borderWidth: 2,
-            borderColor: '#111',
-            alignItems: 'center',
-            justifyContent: 'center',
-        }}>
-            {selected ? (
-            <View style={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: '#111',
-            }} />
-            ) : null}
-        </View>
-        <Text style={{ marginLeft: 10, fontSize: 16, fontWeight: '700' }}>{label}</Text>
-        </Pressable>
-    );
-    };
+    const saveProfile = async () => {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) return;
+
+        const dob =
+            year && month && day ? `${year}-${month}-${day}` : null;
+
+        const res = await fetch(`${API_BASE_URL}/api/accounts/profile/`, {
+            method: "PUT",
+            headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+            gender,
+            date_of_birth: dob,
+            email,
+            specialist,
+            }),
+        });
+
+        if (!res.ok) {
+            console.log("Doctor profile update failed", await res.text());
+            return;
+        }
+
+        setIsEditing(false);
+        };
+
+
+    const Radio = ({ label, selected, onPress, disabled }) => {
+        return (
+            <Pressable
+            onPress={onPress}
+            disabled={disabled}
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+            >
+            <View
+                style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                borderWidth: 2,
+                borderColor: disabled ? "#AAA" : "#111",
+                alignItems: 'center',
+                justifyContent: 'center',
+                }}
+            >
+                {selected && (
+                <View
+                    style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: disabled ? "#AAA" : "#111",
+                    }}
+                />
+                )}
+            </View>
+            <Text style={{ marginLeft: 10, fontSize: 16, fontWeight: '700' }}>
+                {label}
+            </Text>
+            </Pressable>
+        );
+        };
+
 
     return (
         <ScrollView>
@@ -64,7 +169,11 @@ const doctorpersonaldetail = () => {
 
                 <View style={styles.card}>
                     <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Username</Text>
-                    <TextInput value={username} onChangeText={setUsername} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} />
+                    <TextInput
+                    value={username}
+                    editable={false}
+                    style={[styles.labelInput, styles.inputDisabled]}
+                    />
 
                     <Text style={styles.label}>Gender</Text>
                     <View style={styles.genderRow}>
@@ -101,28 +210,51 @@ const doctorpersonaldetail = () => {
                         />
                     </View>
 
-                    <Text style={styles.label}>Role</Text>
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => isEditing && setShowOccModal(true)} style={[styles.selectField, !isEditing && styles.inputDisabled]} >
-                        <Text style={[styles.selectText, !isEditing && styles.selectTextDisabled]}>{occupation}</Text>
-                        <Text style={styles.chev}>›</Text>
-                    </TouchableOpacity>
+                   <Text style={styles.label}>Role</Text>
+                    <TextInput
+                    value="Doctor"
+                    editable={false}
+                    style={[styles.labelInput, styles.inputDisabled]}
+                    />
+
 
                     <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Email Address</Text>
-                    <TextInput value={email} onChangeText={setEmail} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} />
-
+                    <TextInput
+                    value={email}
+                    onChangeText={setEmail}
+                    editable={isEditing}
+                    style={[
+                        styles.labelInput,
+                        !isEditing && styles.inputDisabled
+                    ]}
+                    />
                     <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Specialist</Text>
-                    <TextInput value={specialist} onChangeText={setSpecialist} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} />
+                    <TextInput value={specialist} onChangeText={setSpecialist} editable={isEditing} style={[styles.labelInput, !isEditing && styles.inputDisabled]} />
 
                     <Text style={[styles.label, !isEditing && styles.disabledWrap]}>License</Text>
-                    <Image source={require('../assets/doctor_license.webp')} style={styles.license} />
+                    {licenseUrl ? (
+                        <Image source={{ uri: licenseUrl }} style={styles.license} />
+                    ) : (
+                        <Text style={{ marginLeft: 20, marginTop: 10, color: "#777" }}>
+                            No license uploaded
+                        </Text>
+                    )}
 
-                    <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Status</Text>
-                    <View style={styles.statusText}>
-                        <Text>Approved</Text>
-                    </View>
+                    <Text style={styles.label}>Status</Text>
+                    <TextInput
+                        value={status}
+                        editable={false}
+                        style={[
+                            styles.labelInput,
+                            styles.inputDisabled,
+                            status === "rejected" && styles.statusRejected,
+                            status === "pending" && styles.statusPending,
+                            status === "verified" && styles.statusVerified,
+                        ]}
+                    />
 
-                    <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Password</Text>
-                    <TextInput value={password} onChangeText={setPassword} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} />
+                    {/* <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Password</Text>
+                    <TextInput value={password} onChangeText={setPassword} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} /> */}
                 
                     {!isEditing ? (
                         <TouchableOpacity style={styles.editButton} activeOpacity={0.85} onPress={toggleEdit}>
@@ -135,34 +267,6 @@ const doctorpersonaldetail = () => {
                     )}
                 
                 </View>
-
-                {showOccModal && (
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalCard}>
-                        <Text style={styles.modalTitle}>Select Role</Text>
-
-                        {occupations.map((item) => (
-                            <TouchableOpacity
-                            key={item}
-                            style={styles.modalItem}
-                            onPress={() => {
-                                setOccupation(item);
-                                setShowOccModal(false);
-                            }}
-                            >
-                            <Text style={styles.modalItemText}>{item}</Text>
-                            </TouchableOpacity>
-                        ))}
-
-                        <TouchableOpacity
-                            style={styles.modalClose}
-                            onPress={() => setShowOccModal(false)}
-                        >
-                            <Text style={styles.modalCloseText}>Cancel</Text>
-                        </TouchableOpacity>
-                        </View>
-                    </View>
-                )}
 
                 <Text style={styles.disclaimer}>
                     This is a screening tool only. Consult a healthcare professional for diagnosis.
@@ -227,22 +331,22 @@ const styles = StyleSheet.create({
         width: 350,
         height: 180,
         resizeMode: 'contain',
-        marginLeft: 20,
+        // marginLeft: 20,
         marginTop: 10,
     },
-    statusText: {
-        fontSize: 15,
-        color: "#333",
-        height: 42,
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderWidth: 1,
-        borderColor: '#858585ff',
-        borderRadius: 18,
-        marginLeft: 20,
-        marginRight: 20,
-        marginTop: 10,
+
+    statusRejected: {
+        color: "#f80606", // red
     },
+
+    statusPending: {
+        color: "#E6A700", // amber
+    },
+
+    statusVerified: {
+        color: "#0fdf1a", // green
+    },
+
     genderRow: {
         flexDirection: "row",
         alignItems: "center",
