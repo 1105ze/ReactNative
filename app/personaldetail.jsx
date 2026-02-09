@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TextInput, Pressable} from 'react-native'
-import React from 'react'
-import { useRouter } from 'expo-router';
-=======
 // import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TextInput, Pressable} from 'react-native'
 // import React from 'react'
 // import { useRouter } from 'expo-router';
@@ -427,58 +422,10 @@ import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from "../config";
 
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
 
 const personaldetail = () => {
     const router = useRouter();
     const [isEditing, setIsEditing] = React.useState(false);
-<<<<<<< HEAD
-
-    const [username, setUsername] = React.useState("Ze Gui");
-    const [gender, setGender] = React.useState("male");
-    const [day, setDay] = React.useState("01");
-    const [month, setMonth] = React.useState("01");
-    const [year, setYear] = React.useState("2025");
-    const [occupation, setOccupation] = React.useState("Patient");
-    const [email, setEmail] = React.useState("123@gmail.com");
-    const [contact, setContact] = React.useState("+60 12-3456789");
-    const [password, setPassword] = React.useState("Zegui123");
-
-    const occupations = ["Patient", "Doctor"];
-    const [showOccModal, setShowOccModal] = React.useState(false);
-
-    const toggleEdit = () => setIsEditing((v) => !v);
-
-    const saveProfile = () => {
-        setIsEditing(false);
-    };
-
-    const Radio = ({ label, selected, onPress }) => {
-    return (
-        <Pressable onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View style={{
-            width: 20,
-            height: 20,
-            borderRadius: 10,
-            borderWidth: 2,
-            borderColor: '#111',
-            alignItems: 'center',
-            justifyContent: 'center',
-        }}>
-            {selected ? (
-            <View style={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: '#111',
-            }} />
-            ) : null}
-        </View>
-        <Text style={{ marginLeft: 10, fontSize: 16, fontWeight: '700' }}>{label}</Text>
-        </Pressable>
-    );
-    };
-=======
     
     const [username, setUsername] = React.useState("");
     const [gender, setGender] = React.useState("");
@@ -693,34 +640,23 @@ const personaldetail = () => {
         };
 
 
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
 
     return (
         <ScrollView>
             <View>
                 <View style={styles.header}>
-<<<<<<< HEAD
-                    <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-=======
                     <TouchableOpacity style={styles.back} onPress={() => router.push('/home')}>
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
                         <Text style={styles.backText}>‹   Personal Details</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.card}>
-<<<<<<< HEAD
-                    <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Username</Text>
-                    <TextInput value={username} onChangeText={setUsername} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} />
-
-=======
                     <Text style={styles.label}>Username</Text>
                     <TextInput
                     value={username}
                     editable={false}
                     style={[styles.labelInput, styles.inputDisabled]}
                     />
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
                     <Text style={styles.label}>Gender</Text>
                     <View style={styles.genderRow}>
                         <Radio label="Male" selected={gender === "male"} onPress={() => isEditing && setGender("male")} disabled={!isEditing} />
@@ -757,21 +693,6 @@ const personaldetail = () => {
                     </View>
 
                     <Text style={styles.label}>Role</Text>
-<<<<<<< HEAD
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => isEditing && setShowOccModal(true)} style={[styles.selectField, !isEditing && styles.inputDisabled]} >
-                        <Text style={[styles.selectText, !isEditing && styles.selectTextDisabled]}>{occupation}</Text>
-                        <Text style={styles.chev}>›</Text>
-                    </TouchableOpacity>
-
-                    <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Email Address</Text>
-                    <TextInput value={email} onChangeText={setEmail} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} />
-
-                    <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Contact Number</Text>
-                    <TextInput value={contact} onChangeText={setContact} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} />
-
-                    <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Password</Text>
-                    <TextInput value={password} onChangeText={setPassword} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} />
-=======
                     <TextInput
                     value={
                         role
@@ -795,7 +716,6 @@ const personaldetail = () => {
 
                     {/* <Text style={[styles.label, !isEditing && styles.disabledWrap]}>Password</Text>
                     <TextInput value={password} onChangeText={setPassword} editable={isEditing} style={[styles.labelInput, !isEditing && styles.disabledInput]} /> */}
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
                 
                     {!isEditing ? (
                         <TouchableOpacity style={styles.editButton} activeOpacity={0.85} onPress={toggleEdit}>
@@ -809,37 +729,6 @@ const personaldetail = () => {
                 
                 </View>
 
-<<<<<<< HEAD
-                {showOccModal && (
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalCard}>
-                        <Text style={styles.modalTitle}>Select Occupation</Text>
-
-                        {occupations.map((item) => (
-                            <TouchableOpacity
-                            key={item}
-                            style={styles.modalItem}
-                            onPress={() => {
-                                setOccupation(item);
-                                setShowOccModal(false);
-                            }}
-                            >
-                            <Text style={styles.modalItemText}>{item}</Text>
-                            </TouchableOpacity>
-                        ))}
-
-                        <TouchableOpacity
-                            style={styles.modalClose}
-                            onPress={() => setShowOccModal(false)}
-                        >
-                            <Text style={styles.modalCloseText}>Cancel</Text>
-                        </TouchableOpacity>
-                        </View>
-                    </View>
-                )}
-
-=======
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
                 <Text style={styles.disclaimer}>
                     This is a screening tool only. Consult a healthcare professional for diagnosis.
                 </Text>
@@ -963,12 +852,6 @@ const styles = StyleSheet.create({
     selectTextDisabled: { 
         color: "#777" 
     },
-<<<<<<< HEAD
-    inputDisabled: { 
-        backgroundColor: "#F0F0F0" 
-    },
-=======
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
     editButton: {
         marginTop: 30,
         height: 45,
@@ -1028,13 +911,8 @@ const styles = StyleSheet.create({
         fontSize: 11,
         textAlign: 'center',
         marginTop: 560,
-<<<<<<< HEAD
-    }
-})
-=======
     },
     disabledWrap: {
     color: "#777",
     },
 })
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b

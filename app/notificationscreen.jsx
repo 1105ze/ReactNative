@@ -1,11 +1,6 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native'
 import React from 'react'
 import { useRouter } from 'expo-router';
-<<<<<<< HEAD
-
-const notificationscreen = () => {
-  const router = useRouter();
-=======
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from "../config";
@@ -92,7 +87,6 @@ import { API_BASE_URL } from "../config";
       );
     };
 
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
     return (
       <View>
           <View style={styles.header}>
@@ -105,62 +99,16 @@ import { API_BASE_URL } from "../config";
 
                   <Text style={styles.subtitle}>Diabetic Retinopathy Screening</Text>
               </View>
-<<<<<<< HEAD
-              <Text style={styles.username}>Ze Gui</Text>
-          </View>
-
-          <View>
-              <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-=======
               <Text style={styles.username}>Hey, {user ? user.username : ""}</Text>
           </View>
 
           <View>
               <TouchableOpacity style={styles.back} onPress={() => router.push('/home')}>
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
                   <Text style={styles.notificationText}>‹   Notifications</Text>
               </TouchableOpacity>
           </View>
 
           <ScrollView>
-<<<<<<< HEAD
-              <View style={styles.card}>
-                  <Image source={require('../assets/note_icon.png')} style={styles.noteImage} />
-
-                  <View>
-                      <Text style={styles.topic}>Classification Result is Ready!</Text>
-
-                      <Text style={styles.cardText}>
-                        Your image upload from [Date] has been classified and verified.
-                        Tap to view the official report and recommended next steps.
-                      </Text>
-
-                      <TouchableOpacity style={styles.button}>
-                        <Text style={styles.buttonText}>View Full Report</Text>
-                      </TouchableOpacity>
-
-                      <Text style={styles.time}>2 hours ago</Text>
-                  </View>
-              </View>
-
-              <View style={[styles.card, styles.grayCard]}>
-                  <Image source={require('../assets/medical_icon.png')} style={styles.noteImage} />
-
-                  <View>
-                      <Text style={styles.topic}>Time to Re-Screen</Text>
-
-                      <Text style={styles.cardText}>
-                        Based on your last [Mild/Moderate] result, it's time for your follow-up screening.
-                        We recommend another check within 3 months.
-                      </Text>
-
-                      <Text style={styles.time}>2 hours ago</Text>
-                  </View>
-              </View>
-          </ScrollView>
-
-          <TouchableOpacity style={styles.markRead}>
-=======
             {notifications.map((item) => (
               <TouchableOpacity
                 key={item.id}
@@ -210,7 +158,6 @@ import { API_BASE_URL } from "../config";
           </ScrollView>
 
           <TouchableOpacity style={styles.markRead} onPress={markAllAsRead}>
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
             <Image source={require('../assets/eye_open.png')} style={styles.eyeIcon} />
               <Text style={styles.markReadText}>Mark All As Read</Text>
           </TouchableOpacity>

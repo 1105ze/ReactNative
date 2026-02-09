@@ -33,12 +33,6 @@ const Home = () => {
       const data = await response.json();
 
       if (response.ok) {
-<<<<<<< HEAD
-        // 🔥 REMOVE OLD USER COMPLETELY
-        await AsyncStorage.removeItem("user");
-
-        // ✅ SAVE NEW USER
-=======
         // 🔥 clear old data
         await AsyncStorage.removeItem("user");
         await AsyncStorage.removeItem("accessToken");
@@ -47,7 +41,6 @@ const Home = () => {
         await AsyncStorage.setItem("accessToken", data.access);
 
         // ✅ SAVE USER
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
         await AsyncStorage.setItem(
           "user",
           JSON.stringify({
@@ -58,12 +51,7 @@ const Home = () => {
         );
 
         alert("Login successful!");
-<<<<<<< HEAD
-
-        router.replace('/home');
-=======
         router.replace("/home");
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
       } else {
         if (data.error === "NO_ACCOUNT") {
           alert("No account found. Please create an account.");
@@ -83,11 +71,7 @@ const Home = () => {
     <View>
   {/* Header */}        
       <View>
-<<<<<<< HEAD
-        <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-=======
         <TouchableOpacity style={styles.back} onPress={() => router.push('/firstpage')}>
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
           <Image source={require('../assets/back_icon.png')} style={styles.backImage} />
         </TouchableOpacity>
       </View>

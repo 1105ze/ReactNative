@@ -2,10 +2,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, FlatList }
 import React, { useRef, useState, useEffect } from 'react'
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-<<<<<<< HEAD
-=======
 import { API_BASE_URL } from "../config";
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
 
 const home = () => {
     const router = useRouter();
@@ -27,20 +24,6 @@ const home = () => {
         {id: "3", image: require('../assets/eye_open.png')},
     ]
 
-<<<<<<< HEAD
-    const recentUploads = [
-        {
-            id: "r1",
-            image: require("../assets/eye_open.png"),
-            time: "Uploaded by 3/12/2025 8:00:00 P.M.",
-        },
-        {
-            id: "r2",
-            image: require("../assets/eye_open.png"),
-            time: "Uploaded by 2/12/2025 9:10:00 A.M.",
-        },
-    ];
-=======
     // const recentUploads = [
     //     {
     //         id: "r1",
@@ -77,7 +60,6 @@ const home = () => {
 
     loadRecentUploads();
     }, []);
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
 
     const adListRef = useRef(null);
     const [activeAdIndex, setActiveAdIndex] = useState(0);
@@ -114,20 +96,12 @@ const home = () => {
                             <Text style={styles.navigationText}>Upload Image</Text>
                         </TouchableOpacity>
 
-<<<<<<< HEAD
-                        <TouchableOpacity style={styles.navigationButton} onPress={() => router.push('/mainhistory')} >
-=======
                         <TouchableOpacity style={styles.navigationButton} onPress={() => router.push('/history')} >
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
                             <Image source={require('../assets/clock_icon.png')} style={styles.navigationImage} />
                             <Text style={styles.navigationText}>View History</Text>
                         </TouchableOpacity>
 
-<<<<<<< HEAD
-                        <TouchableOpacity style={styles.navigationButton} onPress={() => router.push('/specialist')} >
-=======
                         <TouchableOpacity style={styles.navigationButton} onPress={() => router.push('/upload')} >
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
                             <Image source={require('../assets/specialist_icon.png')} style={styles.navigationImage} />
                             <Text style={styles.navigationText}>Specialist</Text>
                         </TouchableOpacity>
@@ -139,11 +113,7 @@ const home = () => {
                         <FlatList 
                             ref={adListRef}
                             data={ads}
-<<<<<<< HEAD
-                            keyExtractor={(item) => item.id}
-=======
                             keyExtractor={(item) => item.id.toString()}
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
                             horizontal pagingEnabled
                             showsHorizontalScrollIndicator = {false}
                             onScroll = {onAdScroll}
@@ -189,27 +159,6 @@ const home = () => {
                         </TouchableOpacity>
                     </View>
 
-<<<<<<< HEAD
-                    <FlatList
-                        data={recentUploads}
-                        keyExtractor={(item) => item.id}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{
-                            paddingLeft: 20,
-                            paddingRight: 10,
-                            paddingBottom: 10,
-                        }}
-                        renderItem={({ item }) => (
-                        <TouchableOpacity activeOpacity={0.9} style={styles.recentCard} onPress={() => router.push("/history")}>
-                            <Image source={item.image} style={styles.recentImage} />
-                            <View style={styles.recentOverlay}>
-                            <Text style={styles.recentOverlayText}>{item.time}</Text>
-                            </View>
-                        </TouchableOpacity>
-                        )}
-                    />
-=======
                     {recentUploads.length === 0 ? (
                         <View style={styles.emptyState}>
                             <Image
@@ -260,7 +209,6 @@ const home = () => {
                             )}
                         />
                     )}
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
 
                     <TouchableOpacity style={styles.signoutButton} onPress={() => router.push("/firstpage")}>
                         <Image source={require('../assets/signout_icon.png')} style={styles.signoutImage} />
@@ -484,8 +432,6 @@ const styles = StyleSheet.create({
         color: "red",
         marginLeft: 5,
     },
-<<<<<<< HEAD
-=======
     emptyState: {
     alignItems: "center",
     justifyContent: "center",
@@ -529,5 +475,4 @@ const styles = StyleSheet.create({
         fontWeight: "700",
     },
 
->>>>>>> 68f28fc0c08a7201d700079d57bbd9b1d18e011b
 })
