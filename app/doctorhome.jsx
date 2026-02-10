@@ -382,23 +382,23 @@ const styles = StyleSheet.create({
     //     borderColor: '#54adfaff',
     //     },
     profile: {
-  width: 64,
-  height: 64,
-  borderRadius: 32,
-  backgroundColor: "#FFFFFF",
-  borderWidth: 4,
-  borderColor: "#4da3ff",
-  justifyContent: "center",
-  alignItems: "center",
-  overflow: "hidden",   // IMPORTANT
-},
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: "#FFFFFF",
+        borderWidth: 4,
+        borderColor: "#4da3ff",
+        justifyContent: "center",
+        alignItems: "center",
+        overflow: "hidden",   // IMPORTANT
+        },
 
-profileImage: {
-  width: "100%",
-  height: "100%",
-  borderRadius: 32,
-  resizeMode: "cover",
-},
+    profileImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 32,
+    resizeMode: "cover",
+    },
 
     // profileImage: {
     //     width: 38,

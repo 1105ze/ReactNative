@@ -1,52 +1,164 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Pressable } from 'react-native'
-import React from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useRouter } from 'expo-router';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from "../config";
+import { useLocalSearchParams } from "expo-router";
 
 
 const result = () => {
     const router = useRouter();
+    const [profileImage, setProfileImage] = useState(null);
+    useEffect(() => {
+        const loadProfileImage = async () => {
+            const token = await AsyncStorage.getItem("accessToken");
+            if (!token) return;
 
-    const doctors = [
-    {
-      id: "dr-philip",
-      name: "Dr.Philip",
-      phone: "+60 125839302",
-      exp: "10+ years experience",
-      hours: "Mon–Fri; 9:00 AM – 5:00 PM",
-      specialty: "Retina Specialist",
-      clinic: "ABC Eye Specialist Centre",
-      location: "Kuala Lumpur, Malaysia",
-      avatar: "https://i.pravatar.cc/200?img=12",
-    },
-    {
-      id: "dr-lee",
-      name: "Dr.Lee",
-      phone: "+60 1122334455",
-      exp: "8 years experience",
-      hours: "Mon–Sat; 10:00 AM – 6:00 PM",
-      specialty: "Ophthalmologist",
-      clinic: "VisionCare Clinic",
-      location: "Petaling Jaya, Malaysia",
-      avatar: "https://i.pravatar.cc/200?img=32",
-    },
-    ];
+            const res = await fetch(`${API_BASE_URL}/api/accounts/profile/`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            });
 
-    const [selectedDoctor, setSelectedDoctor] = React.useState(doctors[0]);
+            if (res.ok) {
+            const data = await res.json();
+            if (data.profile_image) {
+                setProfileImage(
+                data.profile_image.startsWith("data:")
+                    ? data.profile_image
+                    : `data:image/jpeg;base64,${data.profile_image}`
+                );
+            }
+            }
+        };
+
+        loadProfileImage();
+        }, []);
+
+    const [doctors, setDoctors] = useState([]);
+    useEffect(() => {
+        const loadDoctors = async () => {
+            const token = await AsyncStorage.getItem("accessToken");
+            if (!token) return;
+
+            try {
+            const res = await fetch(
+                `${API_BASE_URL}/api/accounts/doctors/verified/`,
+                {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                }
+            );
+
+            if (res.ok) {
+                const data = await res.json();
+                setDoctors(data);
+            }
+            } catch (err) {
+            console.log("Failed to load doctors");
+            }
+        };
+
+        loadDoctors();
+        }, []);
+
+    // const doctors = [
+    // {
+    //   id: "dr-philip",
+    //   name: "Dr.Philip",
+    //   phone: "+60 125839302",
+    //   exp: "10+ years experience",
+    //   hours: "Mon–Fri; 9:00 AM – 5:00 PM",
+    //   specialty: "Retina Specialist",
+    //   clinic: "ABC Eye Specialist Centre",
+    //   location: "Kuala Lumpur, Malaysia",
+    //   avatar: "https://i.pravatar.cc/200?img=12",
+    // },
+    // {
+    //   id: "dr-lee",
+    //   name: "Dr.Lee",
+    //   phone: "+60 1122334455",
+    //   exp: "8 years experience",
+    //   hours: "Mon–Sat; 10:00 AM – 6:00 PM",
+    //   specialty: "Ophthalmologist",
+    //   clinic: "VisionCare Clinic",
+    //   location: "Petaling Jaya, Malaysia",
+    //   avatar: "https://i.pravatar.cc/200?img=32",
+    // },
+    // ];
+
+    const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [showDoctorModal, setShowDoctorModal] = React.useState(false);
     const [showDoctorProfile, setShowDoctorProfile] = React.useState(false);
+    const [doctorSaved, setDoctorSaved] = useState(false);
+    const { retinalImageId } = useLocalSearchParams();
+
+    useEffect(() => {
+        console.log("retinalImageId param:", retinalImageId, typeof retinalImageId);
+        }, [retinalImageId]);
+
+
    
-    const handleSaveDoctor = () => {
-        // you can replace this with API call / database save later
-        // for now just keep UI consistent
+    const handleSaveDoctor = async () => {
+        if (doctorSaved) return;
+
+        if (!selectedDoctor) {
+            alert("Please select a doctor first");
+            return;
+        }
+
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!retinalImageId) {
+        alert("No retinal image found");
+        return;
+        }
+
+        try {
+            const res = await fetch(
+                `${API_BASE_URL}/api/accounts/assign-doctor/`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        retinal_image_id: Number(retinalImageId),
+                        doctor_id: selectedDoctor.id,
+                    }),
+                }
+            );
+
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || "Failed to save");
+                return;
+                }
+
+                // ✅ mark saved
+                setDoctorSaved(true);
+
+                alert("Doctor saved successfully");
+        } catch (err) {
+            alert("Network error");
+        }
     };
+
 
 
     return (
         <View>
             <View style={styles.header}>
                 <TouchableOpacity style={styles.profile} onPress={() => router.push('/profile')}>
-                    <Image source={require('../assets/people_icon.png')} style={styles.profileImage} />
+                    <Image
+                        source={
+                            profileImage
+                            ? { uri: profileImage }
+                            : require("../assets/people_icon.png")
+                        }
+                        style={styles.profileImage}
+                        />
                 </TouchableOpacity>
 
                 <View style={styles.Texttitle}>
@@ -62,6 +174,49 @@ const result = () => {
                     <Text style={styles.backText}>‹   Result</Text>
                 </TouchableOpacity>
             </View>
+
+            {showDoctorModal && (
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalCard}>
+                    <Text style={styles.modalTitle}>Select Doctor</Text>
+
+                    <ScrollView>
+                        {doctors.map((doc) => (
+                        <TouchableOpacity
+                            key={doc.id}
+                            style={styles.modalItem}
+                            onPress={() => {
+                            setSelectedDoctor(doc);
+                            setShowDoctorModal(false);
+                            }}
+                        >
+                            <Image
+                            source={
+                                doc.profile_image
+                                ? { uri: doc.profile_image }
+                                : require("../assets/people_icon.png")
+                            }
+                            style={styles.modalAvatar}
+                            />
+                            <View>
+                            <Text style={styles.modalItemName}>{doc.name}</Text>
+                            <Text style={styles.modalItemSub}>
+                                {doc.specialization}
+                            </Text>
+                            </View>
+                        </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+
+                    <TouchableOpacity
+                        style={styles.modalCloseBtn}
+                        onPress={() => setShowDoctorModal(false)}
+                    >
+                        <Text style={styles.modalCloseText}>Close</Text>
+                    </TouchableOpacity>
+                    </View>
+                </View>
+                )}
 
             <ScrollView style={styles.scroll}>
                 <View style={styles.firstCard}>
@@ -99,23 +254,36 @@ const result = () => {
                             onPress={() => setShowDoctorModal(true)}
                             >
                             <Text style={styles.selectText}>
-                                Default ({selectedDoctor.name})
+                                {selectedDoctor ? `${selectedDoctor.name}` : "Select Doctor"}
                             </Text>
                             <Text style={styles.chev}>⌄</Text>
                             </TouchableOpacity>
                         </View>
 
                         <View style={styles.actionRow}>
-                            <TouchableOpacity style={styles.smallBtn} onPress={handleSaveDoctor}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.smallBtn,
+                                    doctorSaved && { opacity: 0.5 }
+                                ]}
+                                disabled={doctorSaved}
+                                onPress={handleSaveDoctor}
+                            >
                             <Text style={styles.smallBtnText}>Save</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                            style={styles.smallBtn}
-                            onPress={() => setShowDoctorProfile(true)}
-                            >
-                            <Text style={styles.smallBtnText}>View Profile</Text>
-                            </TouchableOpacity>
+                                style={styles.smallBtn}
+                                onPress={() => {
+                                    if (!selectedDoctor) {
+                                    alert("Please select a doctor first");
+                                    return;
+                                    }
+                                    setShowDoctorProfile(true);
+                                }}
+                                >
+                                <Text style={styles.smallBtnText}>View Profile</Text>
+                                </TouchableOpacity>
                         </View>
 
                         <Text style={styles.verifyHint}>▲ The Verification process done within 3 days</Text>
@@ -134,19 +302,25 @@ const result = () => {
 
                         <View style={styles.profileLeft}>
                             <Image
-                            source={{ uri: selectedDoctor.avatar }}
-                            style={styles.docAvatar}
-                            />
+                                source={
+                                    selectedDoctor?.profile_image
+                                    ? { uri: selectedDoctor.profile_image }
+                                    : require("../assets/people_icon.png")
+                                }
+                                style={styles.docAvatar}
+                                />
                         </View>
 
                         <View style={styles.profileRight}>
-                            <Text style={styles.docName}>{selectedDoctor.name}</Text>
-                            <Text style={styles.docLine}>{selectedDoctor.phone}</Text>
-                            <Text style={styles.docLine}>{selectedDoctor.exp}</Text>
-                            <Text style={styles.docLine}>{selectedDoctor.hours}</Text>
-                            <Text style={styles.docLine}>{selectedDoctor.specialty}</Text>
-                            <Text style={styles.docLine}>{selectedDoctor.clinic}</Text>
-                            <Text style={styles.docLine}>{selectedDoctor.location}</Text>
+                            <Text style={styles.docName}>
+                                {selectedDoctor?.name || "Doctor not selected"}
+                            </Text>
+                            <Text style={styles.docLine}>
+                                {selectedDoctor?.specialization || "-"}
+                            </Text>
+                            <Text style={styles.docLine}>
+                                {selectedDoctor?.email || "-"}
+                            </Text>
                         </View>
                         </View>
                     )}
@@ -226,22 +400,40 @@ const styles = StyleSheet.create({
         backgroundColor: "#88C8FF",
         paddingVertical: 15,
     },
-    profile: {
-        backgroundColor: "#aad5fcff",
-        paddingVertical: 15,
-        borderRadius: 100,
-        marginLeft: 30,
-        alignItems: "center",
-        borderWidth: 3,
-        borderColor: '#54adfaff',
-    },
-    profileImage: {
-        width: 43,
-        height: 30,
-        marginRight: 10,
-        resizeMode: 'contain',
-        marginLeft: "8",
-    },
+    // profile: {
+    //     backgroundColor: "#aad5fcff",
+    //     paddingVertical: 15,
+    //     borderRadius: 100,
+    //     marginLeft: 30,
+    //     alignItems: "center",
+    //     borderWidth: 3,
+    //     borderColor: '#54adfaff',
+    // },
+    // profileImage: {
+    //     width: 43,
+    //     height: 30,
+    //     marginRight: 10,
+    //     resizeMode: 'contain',
+    //     marginLeft: "8",
+    // },
+  profile: {
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+  marginLeft: 30,
+  borderWidth: 3,
+  borderColor: "#54adfa",
+  backgroundColor: "#aad5fc",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden",   // 🔥 REQUIRED for circle
+},
+profileImage: {
+  width: "100%",
+  height: "100%",
+  resizeMode: "cover",  // 🔥 REQUIRED
+},
+
     Texttitle: {
         flex: 1,
         marginTop: 5
@@ -468,11 +660,21 @@ const styles = StyleSheet.create({
     disclaimerText: { fontSize: 12, lineHeight: 16, opacity: 0.9 },
 
     // Modal
+    // modalOverlay: {
+    //     flex: 1,
+    //     backgroundColor: "rgba(0,0,0,0.35)",
+    //     justifyContent: "center",
+    //     paddingHorizontal: 18,
+    // },
     modalOverlay: {
-        flex: 1,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         backgroundColor: "rgba(0,0,0,0.35)",
         justifyContent: "center",
-        paddingHorizontal: 18,
+        zIndex: 999, // 🔥 IMPORTANT
     },
     modalCard: {
         backgroundColor: "#fff",

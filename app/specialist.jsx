@@ -47,6 +47,33 @@ const Specialist = () => {
     loadDoctors();
   }, []);
 
+  const [profileImage, setProfileImage] = useState(null);
+    useEffect(() => {
+        const loadProfileImage = async () => {
+            const token = await AsyncStorage.getItem("accessToken");
+            if (!token) return;
+
+            const res = await fetch(`${API_BASE_URL}/api/accounts/profile/`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            });
+
+            if (res.ok) {
+            const data = await res.json();
+            if (data.profile_image) {
+                setProfileImage(
+                data.profile_image.startsWith("data:")
+                    ? data.profile_image
+                    : `data:image/jpeg;base64,${data.profile_image}`
+                );
+            }
+            }
+        };
+
+        loadProfileImage();
+        }, []);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return doctors;

@@ -440,6 +440,7 @@ class RetinalImageAdmin(admin.ModelAdmin):
         'uploaded_by_type',
         'uploader_display',       # ← NEW: this will show the correct one
         'uploaded_at',
+        'selected_doctor',
         'image_preview',
         'image_size_display',
     )
@@ -447,6 +448,7 @@ class RetinalImageAdmin(admin.ModelAdmin):
     readonly_fields = (
         'uploaded_at',
         'uploader_display',
+        'selected_doctor',
         'image_preview',
         'image_size_display',
         'uploaded_by_type',

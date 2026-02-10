@@ -145,6 +145,13 @@ class RetinalImage(models.Model):
     retinal_image = models.BinaryField(null=True, blank=True)
     retinal_image_size = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    selected_doctor = models.ForeignKey(
+        Doctor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_retinal_images"
+    )
 
     def uploader_name(self):
         if self.uploaded_by_type == 'patient' and self.patient:

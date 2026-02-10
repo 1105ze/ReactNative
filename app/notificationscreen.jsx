@@ -10,6 +10,33 @@ import { API_BASE_URL } from "../config";
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [notifications, setNotifications] = useState([]);
+    const [profileImage, setProfileImage] = useState(null);
+    useEffect(() => {
+        const loadProfileImage = async () => {
+            const token = await AsyncStorage.getItem("accessToken");
+            if (!token) return;
+
+            const res = await fetch(`${API_BASE_URL}/api/accounts/profile/`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            });
+
+            if (res.ok) {
+            const data = await res.json();
+            if (data.profile_image) {
+                setProfileImage(
+                data.profile_image.startsWith("data:")
+                    ? data.profile_image
+                    : `data:image/jpeg;base64,${data.profile_image}`
+                );
+            }
+            }
+        };
+
+        loadProfileImage();
+        }, []);
+
     useEffect(() => {
       const fetchNotifications = async () => {
         const token = await AsyncStorage.getItem("accessToken");
@@ -90,8 +117,15 @@ import { API_BASE_URL } from "../config";
     return (
       <View>
           <View style={styles.header}>
-              <TouchableOpacity style={styles.profile} onPress={() => router.push('/firstpage')}>
-                  <Image source={require('../assets/people_icon.png')} style={styles.profileImage} />
+              <TouchableOpacity style={styles.profile} onPress={() => router.push('/home')}>
+                  <Image
+                    source={
+                        profileImage
+                        ? { uri: profileImage }
+                        : require("../assets/people_icon.png")
+                    }
+                    style={styles.profileImage}
+                    />
               </TouchableOpacity>
 
               <View style={styles.Texttitle}>
@@ -99,7 +133,7 @@ import { API_BASE_URL } from "../config";
 
                   <Text style={styles.subtitle}>Diabetic Retinopathy Screening</Text>
               </View>
-              <Text style={styles.username}>Hey, {user ? user.username : ""}</Text>
+              <Text style={styles.username}>{user ? user.username : ""}</Text>
           </View>
 
           <View>
@@ -174,22 +208,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#88C8FF",
     paddingVertical: 15,
   },
+  // profile: {
+  //   backgroundColor: "#aad5fcff",
+  //   paddingVertical: 15,
+  //   borderRadius: 100,
+  //   marginLeft: 30,
+  //   alignItems: "center",
+  //   borderWidth: 3,
+  //   borderColor: '#54adfaff',
+  //   },
+  // profileImage: {
+  //   width: 43,
+  //   height: 30,
+  //   marginRight: 10,
+  //   resizeMode: 'contain',
+  //   marginLeft: "8",
+  // },
   profile: {
-    backgroundColor: "#aad5fcff",
-    paddingVertical: 15,
-    borderRadius: 100,
-    marginLeft: 30,
-    alignItems: "center",
-    borderWidth: 3,
-    borderColor: '#54adfaff',
-    },
-  profileImage: {
-    width: 43,
-    height: 30,
-    marginRight: 10,
-    resizeMode: 'contain',
-    marginLeft: "8",
-  },
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+  marginLeft: 30,
+  borderWidth: 3,
+  borderColor: "#54adfa",
+  backgroundColor: "#aad5fc",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden",   // 🔥 REQUIRED for circle
+},
+profileImage: {
+  width: "100%",
+  height: "100%",
+  resizeMode: "cover",  // 🔥 REQUIRED
+},
   Texttitle: {
     flex: 1,
     marginTop: 5

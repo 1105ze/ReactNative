@@ -324,3 +324,25 @@ def verified_doctors(request):
         })
 
     return Response(data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def assign_doctor(request):
+    retinal_image_id = request.data.get("retinal_image_id")
+    doctor_id = request.data.get("doctor_id")
+
+    if not retinal_image_id or not doctor_id:
+        return Response({"error": "Missing data"}, status=400)
+
+    try:
+        retinal_image = RetinalImage.objects.get(id=retinal_image_id)
+        doctor = Doctor.objects.get(id=doctor_id)
+    except (RetinalImage.DoesNotExist, Doctor.DoesNotExist):
+        return Response({"error": "Not found"}, status=404)
+
+    # store selection
+    retinal_image.selected_doctor = doctor
+    retinal_image.save()
+
+    return Response({"success": True})

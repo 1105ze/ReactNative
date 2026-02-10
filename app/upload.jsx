@@ -21,10 +21,46 @@ const upload = () => {
       }; 
       loadUser(); 
     }, []);
+
+  const [profileImage, setProfileImage] = useState(null);
+    useEffect(() => {
+        const loadProfileImage = async () => {
+            const token = await AsyncStorage.getItem("accessToken");
+            if (!token) return;
+
+            const res = await fetch(`${API_BASE_URL}/api/accounts/profile/`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            });
+
+            if (res.ok) {
+            const data = await res.json();
+            if (data.profile_image) {
+                setProfileImage(
+                data.profile_image.startsWith("data:")
+                    ? data.profile_image
+                    : `data:image/jpeg;base64,${data.profile_image}`
+                );
+            }
+            }
+        };
+
+        loadProfileImage();
+        }, []);
+    
     const handleAnalyze = async () => {
-      await uploadImageToBackend();
-      router.push('/result');
+      const retinalImageId = await uploadImageToBackend();
+
+      if (!retinalImageId) return;
+        router.push({
+          pathname: "/result",
+          params: {
+            retinalImageId: String(retinalImageId),
+          },
+        });
     };
+
     const [imageBase64, setImageBase64] = useState(null);
     const openImagePicker = async () => {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -46,47 +82,37 @@ const upload = () => {
       }
     };
 
-    const uploadImageToBackend = async () => {
-      if (!imageBase64) {
-        alert("No image selected");
-        return;
-      }
+  const uploadImageToBackend = async () => {
+    if (!imageBase64 || !user) return null;
 
-      if (!user) {
-        alert("User not logged in");
-        return;
-      }
-
-
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/accounts/retinal-images/`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              image_data: imageBase64,
-              uploaded_by_type: user.role,   // "doctor" or "patient"
-              uploaded_by_id: user.id,
-            }),
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          alert(data.error || "Upload failed");
-          return;
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/accounts/retinal-images/`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image_data: imageBase64,
+            uploaded_by_type: user.role,
+            uploaded_by_id: user.id,
+          }),
         }
+      );
 
-        alert("Image uploaded successfully");
-        setImage(null);
-        setImageBase64(null);
+      const data = await response.json();
 
-      } catch (error) {
-        alert("Error uploading image");
+      if (!response.ok) {
+        alert(data.error || "Upload failed");
+        return null;
       }
-    };
+
+      return data.retinal_image_id;
+
+    } catch (error) {
+      alert("Error uploading image");
+      return null;
+    }
+  };
 
 
 
@@ -94,7 +120,14 @@ const upload = () => {
     <View style={{flex: 1}}>
         <View style={styles.header}>
             <TouchableOpacity style={styles.profile} onPress={() => router.push('/home')}>
-                <Image source={require('../assets/people_icon.png')} style={styles.profileImage} />
+                <Image
+                  source={
+                      profileImage
+                      ? { uri: profileImage }
+                      : require("../assets/people_icon.png")
+                  }
+                  style={styles.profileImage}
+                  />
             </TouchableOpacity>
 
             <View style={styles.Texttitle}>
@@ -103,7 +136,7 @@ const upload = () => {
                 <Text style={styles.subtitle}>Diabetic Retinopathy Screening</Text>
             </View>
             <Text style={styles.username}>
-              Hey, {user ? user.username : ""}
+              {user ? user.username : ""}
             </Text>
         </View>
 
@@ -171,22 +204,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#88C8FF",
     paddingVertical: 15,
   },
+  // profile: {
+  //   backgroundColor: "#aad5fcff",
+  //   paddingVertical: 15,
+  //   borderRadius: 100,
+  //   marginLeft: 30,
+  //   alignItems: "center",
+  //   borderWidth: 3,
+  //   borderColor: '#54adfaff',
+  //   },
+  // profileImage: {
+  //   width: 43,
+  //   height: 30,
+  //   marginRight: 10,
+  //   resizeMode: 'contain',
+  //   marginLeft: "8",
+  // },
   profile: {
-    backgroundColor: "#aad5fcff",
-    paddingVertical: 15,
-    borderRadius: 100,
-    marginLeft: 30,
-    alignItems: "center",
-    borderWidth: 3,
-    borderColor: '#54adfaff',
-    },
-  profileImage: {
-    width: 43,
-    height: 30,
-    marginRight: 10,
-    resizeMode: 'contain',
-    marginLeft: "8",
-  },
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+  marginLeft: 30,
+  borderWidth: 3,
+  borderColor: "#54adfa",
+  backgroundColor: "#aad5fc",
+  justifyContent: "center",
+  alignItems: "center",
+  overflow: "hidden",   // 🔥 REQUIRED for circle
+},
+profileImage: {
+  width: "100%",
+  height: "100%",
+  resizeMode: "cover",  // 🔥 REQUIRED
+},
   Texttitle: {
     flex: 1,
     marginTop: 5
