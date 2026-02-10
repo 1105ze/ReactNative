@@ -233,7 +233,58 @@ const doctorhome = () => {
                         </TouchableOpacity>
                     </View>
 
-                    <FlatList
+                    {recentUploads.length === 0 ? (
+                                            <View style={styles.emptyState}>
+                                                <Image
+                                                    source={require('../assets/eye_open.png')}
+                                                    style={styles.emptyImage}
+                                                />
+                                                <Text style={styles.emptyTitle}>No uploads yet</Text>
+                                                <Text style={styles.emptySubtitle}>
+                                                    Upload your first retinal image to get started
+                                                </Text>
+                    
+                                                {/* <TouchableOpacity
+                                                    style={styles.emptyButton}
+                                                    onPress={() => router.push("/upload")}
+                                                >
+                                                    <Text style={styles.emptyButtonText}>Upload Image</Text>
+                                                </TouchableOpacity> */}
+                                            </View>
+                                        ) : (
+                                            <FlatList
+                                                data={recentUploads}
+                                                keyExtractor={(item) => item.id.toString()}
+                                                horizontal
+                                                showsHorizontalScrollIndicator={false}
+                                                contentContainerStyle={{
+                                                    paddingLeft: 20,
+                                                    paddingRight: 10,
+                                                    paddingBottom: 10,
+                                                }}
+                                                renderItem={({ item }) => (
+                                                    <TouchableOpacity
+                                                        activeOpacity={0.9}
+                                                        style={styles.recentCard}
+                                                        onPress={() => router.push("/history")}
+                                                    >
+                                                        <Image
+                                                            source={{
+                                                                uri: `data:image/jpeg;base64,${item.image_base64}`,
+                                                            }}
+                                                            style={styles.recentImage}
+                                                        />
+                                                        <View style={styles.recentOverlay}>
+                                                            <Text style={styles.recentOverlayText}>
+                                                                Uploaded on {new Date(item.created_at).toLocaleString()}
+                                                            </Text>
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                )}
+                                            />
+                                        )}
+
+                    {/* <FlatList
                         data={recentUploads}
                         keyExtractor={(item) => item.id.toString()}
                         horizontal
@@ -251,7 +302,7 @@ const doctorhome = () => {
                             </View>
                             </TouchableOpacity>
                         )}
-                        />
+                        /> */}
 
 
                     <TouchableOpacity style={styles.signoutButton} onPress={() => router.push("/firstpage")}>
@@ -554,5 +605,47 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         color: "red",
         marginLeft: 5,
+    },
+        emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 30,
+    marginBottom: 20,
+    paddingHorizontal: 30,
+    },
+
+    emptyImage: {
+        width: 120,
+        height: 120,
+        resizeMode: "contain",
+        opacity: 0.6,
+        marginBottom: 12,
+    },
+
+    emptyTitle: {
+        fontSize: 20,
+        fontWeight: "700",
+        color: "#333",
+        marginBottom: 6,
+    },
+
+    emptySubtitle: {
+        fontSize: 14,
+        color: "#777",
+        textAlign: "center",
+        marginBottom: 18,
+    },
+
+    emptyButton: {
+        backgroundColor: "#2E7BEA",
+        paddingHorizontal: 28,
+        paddingVertical: 12,
+        borderRadius: 25,
+    },
+
+    emptyButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "700",
     },
 })
