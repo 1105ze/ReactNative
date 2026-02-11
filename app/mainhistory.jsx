@@ -47,115 +47,132 @@ export default function MainHistory() {
     }
 
   return (
-    <ScrollView style={styles.container}>
-
-      {/* Header */}
+    <View style={{ flex: 1 }}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>Detection History</Text>
+          <View style={styles.avatarCircle} />
+          <View style={styles.headerTitleWrap}>
+              <Text style={styles.headerTitle}>DR Detection</Text>
+              <Text style={styles.headerSubtitle}>Diabetic Retinopathy Screening</Text>
+          </View>
+          <Text style={styles.headerName}>Ze Gui</Text>
       </View>
 
-      {/* DR Stage */}
-      <Text style={styles.title}>DR Stage</Text>
-
-      {/* Legend */}
-      <View style={styles.legend}>
-        <LegendItem color="#4CAF50" text="No DR" />
-        <LegendItem color="#7CCAC3" text="Mild NPDR" />
-        <LegendItem color="#FFC107" text="Moderate NPDR" />
-        <LegendItem color="#FF7043" text="Severe NPDR" />
-        <LegendItem color="#E53935" text="Proliferative DR" />
+      <View>
+          <TouchableOpacity style={styles.back} onPress={() => router.back()}>
+              <Text style={styles.backText}>‹   Advertisement</Text>
+          </TouchableOpacity>
       </View>
 
-      {/* Timeline (Graph Style) */}
-      <View style={styles.timelineContainer}>
-        
-        {/* Background Status Lines & Dots */}
-        <View style={styles.backgroundLinesContainer}>
-          {/* Proliferative */}
-          <StatusLine color="#E53935" />
+      <ScrollView style={styles.container}>
 
-          {/* Severe */}
-          <StatusLine color="#FF7043" />
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} />
+          </TouchableOpacity>
 
-          {/* Moderate */}
-          <StatusLine color="#FFC107" />
+          <Text style={styles.headerTitle}>Detection History</Text>
         </View>
 
-        <View style={styles.pointsWrapper}>
-          {[
-            { label: "Dec 2024", progress: 0.1 },
-            { label: "Feb 2025", progress: 0.3 },
-            { label: "Apr 2025", progress: 0.5 },
-            { label: "June 2025", progress: 0.5 },
-            { label: "Aug 2025", progress: 0.8 },
-          ].map((item, index) => (
-            <View key={index} style={styles.graphColumn}>
-              <View 
-                style={[
-                  styles.timelineDot, 
-                  { bottom: `${item.progress * 100}%` }
-                ]} 
-              />
-              <Text style={styles.timelineDateText}>{item.label}</Text>
-            </View>
-          ))}
+        {/* DR Stage */}
+        <Text style={styles.title}>DR Stage</Text>
+
+        {/* Legend */}
+        <View style={styles.legend}>
+          <LegendItem color="#4CAF50" text="No DR" />
+          <LegendItem color="#7CCAC3" text="Mild NPDR" />
+          <LegendItem color="#FFC107" text="Moderate NPDR" />
+          <LegendItem color="#FF7043" text="Severe NPDR" />
+          <LegendItem color="#E53935" text="Proliferative DR" />
         </View>
-      </View>
 
+        {/* Timeline (Graph Style) */}
+        <View style={styles.timelineContainer}>
+          
+          {/* Background Status Lines & Dots */}
+          <View style={styles.backgroundLinesContainer}>
+            {/* Proliferative */}
+            <StatusLine color="#E53935" />
 
-      {/* History Title */}
-      <View style={styles.historyHeader}>
-        <Text style={styles.title}>History</Text>
-            <TouchableOpacity onPress={() => router.push('/history')}>
-                <Text style={styles.seeAll}>See all</Text>
-            </TouchableOpacity>
-      </View>
+            {/* Severe */}
+            <StatusLine color="#FF7043" />
 
-      {/* History List */}
-      {history.map((item) => (
-        <TouchableOpacity
-          key={item.id}
-          style={[styles.card, { borderColor: item.color }]}
-          onPress={() => router.push('/result')}
-        >
-
-          <Image source={item.image} style={styles.image} />
-
-          <View style={styles.cardContent}>
-
-            <View
-              style={[
-                styles.statusBadge,
-                { borderColor: item.color },
-              ]}
-            >
-              <Text style={{ color: item.color }}>
-                {item.status}
-              </Text>
-            </View>
-
-            <Text style={styles.date}>{item.date}</Text>
+            {/* Moderate */}
+            <StatusLine color="#FFC107" />
           </View>
 
-          <Ionicons
-            name="chevron-forward"
-            size={22}
-            color={item.color}
-          />
+          <View style={styles.pointsWrapper}>
+            {[
+              { label: "Dec 2024", progress: 0.1 },
+              { label: "Feb 2025", progress: 0.3 },
+              { label: "Apr 2025", progress: 0.5 },
+              { label: "June 2025", progress: 0.5 },
+              { label: "Aug 2025", progress: 0.8 },
+            ].map((item, index) => (
+              <View key={index} style={styles.graphColumn}>
+                <View 
+                  style={[
+                    styles.timelineDot, 
+                    { bottom: `${item.progress * 100}%` }
+                  ]} 
+                />
+                <Text style={styles.timelineDateText}>{item.label}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
 
-        </TouchableOpacity>
-      ))}
 
-      {/* Footer */}
-      <Text style={styles.footer}>
-        This is a screening tool only. Consult a healthcare professional for diagnosis.
-      </Text>
+        {/* History Title */}
+        <View style={styles.historyHeader}>
+          <Text style={styles.title}>History</Text>
+              <TouchableOpacity onPress={() => router.push('/history')}>
+                  <Text style={styles.seeAll}>See all</Text>
+              </TouchableOpacity>
+        </View>
 
-    </ScrollView>
+        {/* History List */}
+        {history.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            style={[styles.card, { borderColor: item.color }]}
+            onPress={() => router.push('/result')}
+          >
+
+            <Image source={item.image} style={styles.image} />
+
+            <View style={styles.cardContent}>
+
+              <View
+                style={[
+                  styles.statusBadge,
+                  { borderColor: item.color },
+                ]}
+              >
+                <Text style={{ color: item.color }}>
+                  {item.status}
+                </Text>
+              </View>
+
+              <Text style={styles.date}>{item.date}</Text>
+            </View>
+
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color={item.color}
+            />
+
+          </TouchableOpacity>
+        ))}
+
+        {/* Footer */}
+        <Text style={styles.footer}>
+          This is a screening tool only. Consult a healthcare professional for diagnosis.
+        </Text>
+
+      </ScrollView>
+    </View>
   );
 }
 
@@ -175,17 +192,48 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 
-  /* Header */
-  header: {
+    header: {
+    backgroundColor: "#88C8FF",
+    paddingVertical: 16,
+    paddingHorizontal: 18,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+  },
+  avatarCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#BFE1FF",
+    borderWidth: 3,
+    borderColor: "#6BB6FF",
+  },
+  headerTitleWrap: { 
+    flex: 1, 
+    marginLeft: 12 
+  },
+  headerTitle: { 
+    fontSize: 18, 
+    fontWeight: "800" 
+  },
+  headerSubtitle: { 
+    marginTop: 6, 
+    fontSize: 13 
+  },
+  headerName: { 
+    fontSize: 16, 
+    fontWeight: "800" 
   },
 
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginLeft: 10,
+  /* Header */
+  backText: {
+    fontSize: 20,
+  },
+  back: {
+    paddingVertical: 15,
+    borderRadius: 100,
+    marginTop: 10,
+    marginLeft: 30,
+    marginRight: 100,
   },
 
   /* Titles */
