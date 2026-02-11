@@ -59,20 +59,12 @@ export default function MainHistory() {
 
       <View>
           <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-              <Text style={styles.backText}>‹   Advertisement</Text>
+              <Text style={styles.backText}>‹   Detection History</Text>
           </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.container}>
 
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} />
-          </TouchableOpacity>
-
-          <Text style={styles.headerTitle}>Detection History</Text>
-        </View>
 
         {/* DR Stage */}
         <Text style={styles.title}>DR Stage</Text>

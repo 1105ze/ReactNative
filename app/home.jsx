@@ -177,9 +177,13 @@ const home = () => {
                                 }, 300);
                             }}
                             renderItem={({item}) => (
-                                <View style={{width: AD_CARD_WIDTH}}>
-                                    <Image source={item.image} style={styles.adsImage} />
-                                </View>
+                                <TouchableOpacity
+                                onPress={() => router.push(item.route)}
+                                activeOpacity={0.8}
+                                style={{ width: AD_CARD_WIDTH }}
+                                >
+                                <Image source={item.image} style={styles.adsImage} />
+                                </TouchableOpacity>
                             )}
                         />
                     </View>
