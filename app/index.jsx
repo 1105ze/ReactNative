@@ -135,7 +135,7 @@ const Home = () => {
 
             <Text style={styles.remember}>Remember me</Text>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/forgetpassword')}>
                 <Text style={styles.forgotPasswordLink}>Forgot Password?</Text>
             </TouchableOpacity>
         </View>
