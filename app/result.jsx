@@ -91,8 +91,9 @@ const result = () => {
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [showDoctorModal, setShowDoctorModal] = React.useState(false);
     const [showDoctorProfile, setShowDoctorProfile] = React.useState(false);
-    const [doctorSaved, setDoctorSaved] = useState(false);
+    const [savedDoctorId, setSavedDoctorId] = useState(null);
     const { retinalImageId } = useLocalSearchParams();
+    const isSameDoctor = savedDoctorId === selectedDoctor?.id;
 
     useEffect(() => {
         console.log("retinalImageId param:", retinalImageId, typeof retinalImageId);
@@ -101,7 +102,6 @@ const result = () => {
 
    
     const handleSaveDoctor = async () => {
-        if (doctorSaved) return;
 
         if (!selectedDoctor) {
             alert("Please select a doctor first");
@@ -137,7 +137,7 @@ const result = () => {
                 }
 
                 // ✅ mark saved
-                setDoctorSaved(true);
+                setSavedDoctorId(selectedDoctor.id);
 
                 alert("Doctor saved successfully");
         } catch (err) {
@@ -243,7 +243,6 @@ const result = () => {
                 <View style={styles.secondCard}>
                     <Text style={styles.doctorTitle}>Doctor Specialist Verify</Text>
 
-                    {!showDoctorProfile ? (
                         <>
                         <View style={styles.verifyRow}>
                             <Text style={styles.chooseDoctorLabel}>Choose Doctor</Text>
@@ -264,13 +263,13 @@ const result = () => {
                             <TouchableOpacity
                                 style={[
                                     styles.smallBtn,
-                                    doctorSaved && { opacity: 0.5 }
+                                    (isSameDoctor) && { opacity: 0.5 }
                                 ]}
-                                disabled={doctorSaved}
+                                disabled={isSameDoctor}
                                 onPress={handleSaveDoctor}
-                            >
-                            <Text style={styles.smallBtnText}>Save</Text>
-                            </TouchableOpacity>
+                                >
+                                <Text style={styles.smallBtnText}>Save</Text>
+                                </TouchableOpacity>
 
                             <TouchableOpacity
                                 style={styles.smallBtn}
@@ -290,40 +289,43 @@ const result = () => {
                         <Text style={styles.verifyHint2}>
                             The Doctor you choose will check the result
                         </Text>
-                        </>
-                    ) : (
-                        <View style={styles.profileCard}>
-                        <Pressable
-                            style={styles.closeX}
-                            onPress={() => setShowDoctorProfile(false)}
-                        >
-                            <Text style={styles.closeXText}>✕</Text>
-                        </Pressable>
 
-                        <View style={styles.profileLeft}>
-                            <Image
-                                source={
+                        {showDoctorProfile && (
+                            <View style={styles.profileCard}>
+                                <Pressable
+                                style={styles.closeX}
+                                onPress={() => setShowDoctorProfile(false)}
+                                >
+                                <Text style={styles.closeXText}>✕</Text>
+                                </Pressable>
+
+                                <View style={styles.profileLeft}>
+                                <Image
+                                    source={
                                     selectedDoctor?.profile_image
-                                    ? { uri: selectedDoctor.profile_image }
-                                    : require("../assets/people_icon.png")
-                                }
-                                style={styles.docAvatar}
+                                        ? { uri: selectedDoctor.profile_image }
+                                        : require("../assets/people_icon.png")
+                                    }
+                                    style={styles.docAvatar}
                                 />
-                        </View>
+                                </View>
 
-                        <View style={styles.profileRight}>
-                            <Text style={styles.docName}>
-                                {selectedDoctor?.name || "Doctor not selected"}
-                            </Text>
-                            <Text style={styles.docLine}>
-                                {selectedDoctor?.specialization || "-"}
-                            </Text>
-                            <Text style={styles.docLine}>
-                                {selectedDoctor?.email || "-"}
-                            </Text>
-                        </View>
-                        </View>
-                    )}
+                                <View style={styles.profileRight}>
+                                <Text style={styles.docName}>
+                                    {selectedDoctor?.name}
+                                </Text>
+                                <Text style={styles.docLine}>
+                                    {selectedDoctor?.specialization}
+                                </Text>
+                                <Text style={styles.docLine}>
+                                    {selectedDoctor?.email}
+                                </Text>
+                                </View>
+                            </View>
+                            )}
+                        </>
+                    
+                    
                     </View>
 
                     <View style={styles.imageCard}>

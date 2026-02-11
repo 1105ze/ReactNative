@@ -10,7 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-export default function mainhistory() {
+export default function MainHistory() {
   const router = useRouter();
 
   // Fake data (later can connect to backend)
@@ -75,11 +75,14 @@ export default function mainhistory() {
         
         {/* Background Status Lines & Dots */}
         <View style={styles.backgroundLinesContainer}>
-          <StatusLine color="#E53935" /> {/* Proliferative */}
-          <StatusLine color="#FF7043" /> {/* Severe */}
-          <StatusLine color="#FFC107" /> {/* Moderate */}
-          <StatusLine color="#7CCAC3" /> {/* Mild */}
-          <StatusLine color="#4CAF50" /> {/* No DR */}
+          {/* Proliferative */}
+          <StatusLine color="#E53935" />
+
+          {/* Severe */}
+          <StatusLine color="#FF7043" />
+
+          {/* Moderate */}
+          <StatusLine color="#FFC107" />
         </View>
 
         <View style={styles.pointsWrapper}>

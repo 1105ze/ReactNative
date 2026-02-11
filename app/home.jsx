@@ -141,7 +141,7 @@ const home = () => {
                             <Text style={styles.navigationText}>Upload Image</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.navigationButton} onPress={() => router.push('/history')} >
+                        <TouchableOpacity style={styles.navigationButton} onPress={() => router.push('/mainhistory')} >
                             <Image source={require('../assets/clock_icon.png')} style={styles.navigationImage} />
                             <Text style={styles.navigationText}>View History</Text>
                         </TouchableOpacity>
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
         borderRadius: 32,
         resizeMode: "cover",
     },
-    
+
     notification: {
         paddingVertical: 15,
         marginRight: 15,
