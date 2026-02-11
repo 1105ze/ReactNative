@@ -85,3 +85,20 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
         return user
+
+class DoctorSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="user.username", read_only=True)
+    email = serializers.CharField(source="user.email", read_only=True)
+    profile_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Doctor
+        fields = ["id", "name", "email", "specialization", "profile_image"]
+
+    def get_profile_image(self, obj):
+        if obj.user.profile_image:
+            return (
+                "data:image/jpeg;base64,"
+                + base64.b64encode(obj.user.profile_image).decode()
+            )
+        return None

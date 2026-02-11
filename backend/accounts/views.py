@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from django.utils import timezone
 from .models import Notification
+from .serializers import DoctorSerializer
 
 
 @api_view(['POST'])
@@ -346,3 +347,27 @@ def assign_doctor(request):
     retinal_image.save()
 
     return Response({"success": True})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_retina_detail(request, pk):
+    try:
+        retina = RetinalImage.objects.get(
+            id=pk,
+            patient__user=request.user
+        )
+    except RetinalImage.DoesNotExist:
+        return Response({"error": "Not found"}, status=404)
+
+    data = {
+        "id": retina.id,
+        "image_base64": base64.b64encode(retina.retinal_image).decode("utf-8"),
+        "assigned_doctor": (
+            DoctorSerializer(retina.selected_doctor).data
+            if retina.selected_doctor
+            else None
+        )
+    }
+
+    return Response(data)

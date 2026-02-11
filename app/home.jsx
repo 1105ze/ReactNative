@@ -237,7 +237,12 @@ const home = () => {
                                 <TouchableOpacity
                                     activeOpacity={0.9}
                                     style={styles.recentCard}
-                                    onPress={() => router.push("/history")}
+                                    onPress={() =>
+                                        router.push({
+                                            pathname: "/result",
+                                            params: { retinalImageId: item.id },
+                                        })
+                                    }
                                 >
                                     <Image
                                         source={{

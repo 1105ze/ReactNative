@@ -9,6 +9,7 @@ import { useLocalSearchParams } from "expo-router";
 const result = () => {
     const router = useRouter();
     const [profileImage, setProfileImage] = useState(null);
+
     useEffect(() => {
         const loadProfileImage = async () => {
             const token = await AsyncStorage.getItem("accessToken");
@@ -36,6 +37,7 @@ const result = () => {
         }, []);
 
     const [doctors, setDoctors] = useState([]);
+
     useEffect(() => {
         const loadDoctors = async () => {
             const token = await AsyncStorage.getItem("accessToken");
@@ -63,37 +65,45 @@ const result = () => {
         loadDoctors();
         }, []);
 
-    // const doctors = [
-    // {
-    //   id: "dr-philip",
-    //   name: "Dr.Philip",
-    //   phone: "+60 125839302",
-    //   exp: "10+ years experience",
-    //   hours: "Mon–Fri; 9:00 AM – 5:00 PM",
-    //   specialty: "Retina Specialist",
-    //   clinic: "ABC Eye Specialist Centre",
-    //   location: "Kuala Lumpur, Malaysia",
-    //   avatar: "https://i.pravatar.cc/200?img=12",
-    // },
-    // {
-    //   id: "dr-lee",
-    //   name: "Dr.Lee",
-    //   phone: "+60 1122334455",
-    //   exp: "8 years experience",
-    //   hours: "Mon–Sat; 10:00 AM – 6:00 PM",
-    //   specialty: "Ophthalmologist",
-    //   clinic: "VisionCare Clinic",
-    //   location: "Petaling Jaya, Malaysia",
-    //   avatar: "https://i.pravatar.cc/200?img=32",
-    // },
-    // ];
+        useEffect(() => {
+            const loadAssignedDoctor = async () => {
+                if (!retinalImageId) return;
+
+                const token = await AsyncStorage.getItem("accessToken");
+                if (!token) return;
+
+                try {
+                const res = await fetch(
+                    `${API_BASE_URL}/api/accounts/retina/${retinalImageId}/`,
+                    {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    }
+                );
+
+                if (res.ok) {
+                    const data = await res.json();
+
+                    if (data.assigned_doctor) {
+                    setSelectedDoctor(data.assigned_doctor);
+                    setSavedDoctorId(data.assigned_doctor.id);
+                    }
+                }
+                } catch (err) {
+                console.log("Failed to load assigned doctor");
+                }
+            };
+
+            loadAssignedDoctor();
+            }, [retinalImageId]);
 
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [showDoctorModal, setShowDoctorModal] = React.useState(false);
     const [showDoctorProfile, setShowDoctorProfile] = React.useState(false);
     const [savedDoctorId, setSavedDoctorId] = useState(null);
+    const isSameDoctor = selectedDoctor && savedDoctorId && selectedDoctor.id === savedDoctorId;
     const { retinalImageId } = useLocalSearchParams();
-    const isSameDoctor = savedDoctorId === selectedDoctor?.id;
 
     useEffect(() => {
         console.log("retinalImageId param:", retinalImageId, typeof retinalImageId);
@@ -263,11 +273,11 @@ const result = () => {
                             <TouchableOpacity
                                 style={[
                                     styles.smallBtn,
-                                    (isSameDoctor) && { opacity: 0.5 }
+                                    isSameDoctor && { opacity: 0.5 }
                                 ]}
                                 disabled={isSameDoctor}
                                 onPress={handleSaveDoctor}
-                                >
+                            >
                                 <Text style={styles.smallBtnText}>Save</Text>
                                 </TouchableOpacity>
 
